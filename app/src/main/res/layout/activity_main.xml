@@ -38,12 +38,13 @@
 
         <ImageButton
             android:layout_width="85dp"
-            android:layout_height="30dp"
+            android:layout_height="48dp"
             android:background="@drawable/freeminecraft"
             android:layout_gravity="right"
             android:scaleType="centerCrop"
             android:src="@drawable/freeminecraft"
-            android:id="@+id/btn1"/>
+            android:id="@+id/btn1"
+            android:contentDescription="dd"/>
     </LinearLayout>
 
     <LinearLayout
@@ -63,7 +64,7 @@
             android:layout_width="350dp"
             android:layout_height="422dp"
             android:layout_gravity="center"
-            android:text=""
+            android:text="0"
             android:scrollHorizontally="false"
             android:id="@+id/tv1"/>
     </LinearLayout>

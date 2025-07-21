@@ -2,6 +2,8 @@ package com.example.aliolio
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -24,10 +26,9 @@ class MainActivity : AppCompatActivity() {
         val info = findViewById<EditText>(R.id.ed1)
         val log = findViewById<TextView>(R.id.tv1)
         val btn = findViewById<ImageButton>(R.id.btn1)
-        var savedinfo:String? = null
         btn.setOnClickListener{
-            savedinfo = info.text.toString()
+            log.text = info.text.toString()
         }
-        log.text = savedinfo
+
     }
 }
