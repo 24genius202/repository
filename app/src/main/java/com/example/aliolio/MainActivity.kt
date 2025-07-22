@@ -10,10 +10,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.savedstate.serialization.saved
+import java.sql.Date
 
 class MainActivity : AppCompatActivity() {
+    var savedlog: String = ""
 
     private val notificationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -34,6 +39,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var isReceiverRegistered = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,14 +53,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("MainActivity", "setContentView 실패", e)
             return
-        }
-
-        try {
-            // 브로드캐스트 리시버 등록
-            registerNotificationReceiver()
-            Log.d("MainActivity", "BroadcastReceiver 등록 시도 완료")
-        } catch (e: Exception) {
-            Log.e("MainActivity", "BroadcastReceiver 등록 실패", e)
         }
 
         try {
@@ -80,11 +79,13 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         Log.d("MainActivity", "onResume 호출됨")
 
-        // onResume에서도 리시버 등록 확인
-        try {
-            registerNotificationReceiver()
-        } catch (e: Exception) {
-            Log.e("MainActivity", "onResume에서 리시버 등록 실패", e)
+        // onResume에서 리시버 등록
+        if (!isReceiverRegistered) {
+            try {
+                registerNotificationReceiver()
+            } catch (e: Exception) {
+                Log.e("MainActivity", "onResume에서 리시버 등록 실패", e)
+            }
         }
     }
 
@@ -92,8 +93,8 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         Log.d("MainActivity", "onPause 호출됨")
 
-        // onPause에서 리시버 해제
-        unregisterNotificationReceiver()
+        // onPause에서는 리시버를 해제하지 않음 (백그라운드에서도 수신 가능하도록)
+        // unregisterNotificationReceiver()
     }
 
     override fun onStop() {
@@ -101,41 +102,62 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "onStop 호출됨")
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivity", "onDestroy 호출됨")
+        unregisterNotificationReceiver()
+    }
+
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerNotificationReceiver() {
         try {
-            val filter = IntentFilter().apply {
-                addAction("NOTIFICATION_RECEIVED")
-                // 패키지 명시적으로 설정 (Android 8.0+ 대응)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    // 명시적 브로드캐스트로 변경
-                }
+            if (isReceiverRegistered) {
+                Log.d("MainActivity", "BroadcastReceiver가 이미 등록됨")
+                return
             }
 
+            val filter = IntentFilter().apply {
+                addAction("NOTIFICATION_RECEIVED")
+            }
+
+            // LocalBroadcastManager 사용 (같은 앱 내에서 통신)
+            LocalBroadcastManager.getInstance(this).registerReceiver(notificationReceiver, filter)
+
+            // 또는 일반 브로드캐스트도 함께 등록 (안전을 위해)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(notificationReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
             } else {
                 registerReceiver(notificationReceiver, filter)
             }
 
-            Log.d("MainActivity", "BroadcastReceiver 등록됨")
+            isReceiverRegistered = true
+            Log.d("MainActivity", "BroadcastReceiver 등록됨 (LocalBroadcast + Normal)")
         } catch (e: Exception) {
             Log.e("MainActivity", "BroadcastReceiver 등록 실패", e)
         }
     }
 
     private fun unregisterNotificationReceiver() {
+        if (!isReceiverRegistered) {
+            Log.d("MainActivity", "BroadcastReceiver가 등록되지 않음")
+            return
+        }
+
         try {
+            // LocalBroadcastManager 해제
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(notificationReceiver)
+
+            // 일반 브로드캐스트 해제
             unregisterReceiver(notificationReceiver)
+
+            isReceiverRegistered = false
             Log.d("MainActivity", "BroadcastReceiver 해제됨")
         } catch (e: IllegalArgumentException) {
             Log.w("MainActivity", "BroadcastReceiver가 이미 해제됨", e)
+            isReceiverRegistered = false
+        } catch (e: Exception) {
+            Log.e("MainActivity", "BroadcastReceiver 해제 실패", e)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterNotificationReceiver()
     }
 
     private fun isNotificationServiceEnabled(): Boolean {
@@ -171,9 +193,13 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         // 알림 정보를 UI에 표시하는 로직
         // 예: RecyclerView 업데이트, 텍스트뷰 업데이트 등
-        Log.d("MainActivity", "새 알림: $packageName - $title: $text")
+        if((title != null && text != null) && !(savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}"))) savedlog += "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n"
+        val logg = findViewById<TextView>(R.id.tv1)
+        logg.text = savedlog
+        Log.d("MainActivity", "새 알림: $packageName - $title: $text (시간: $timestamp)")
     }
 }
