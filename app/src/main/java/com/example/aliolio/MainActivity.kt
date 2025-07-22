@@ -1,5 +1,6 @@
 package com.example.aliolio
 
+import GPT
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -10,12 +11,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.savedstate.serialization.saved
 import java.sql.Date
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     var savedlog: String = ""
@@ -193,13 +197,37 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    private suspend fun preprocess(message: String, bginfo: String): String?{
+        val gpt = GPT
+        val response = gpt.askGPTWithHistory(message, "Conversation History + $bginfo")
+        return response
+    }
+
     @SuppressLint("SetTextI18n")
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         // 알림 정보를 UI에 표시하는 로직
         // 예: RecyclerView 업데이트, 텍스트뷰 업데이트 등
-        if((title != null && text != null) && !(savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}"))) savedlog += "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n"
+        //if(((title != null && text != null) && !(savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}"))) || packageName!! != "com.android.systemui") savedlog = "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + savedlog
+        if((title == null && text == null) || (savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}")) || packageName!! == "com.android.systemui" || (packageName == "com.samsung.android.messaging" && text == "메시지 보기"))
+        else savedlog = "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + savedlog
         val logg = findViewById<TextView>(R.id.tv1)
+        val info = findViewById<EditText>(R.id.ed1)
+        val button = findViewById<ImageButton>(R.id.btn1)
+        var bginfo: String = ""
+        button.setOnClickListener{
+            bginfo = info.text.toString()
+        }
         logg.text = savedlog
         Log.d("MainActivity", "새 알림: $packageName - $title: $text (시간: $timestamp)")
+        val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        fun runGPT(){
+            scope.launch {
+                val result = preprocess("패키지: $packageName\n" + "제목: $title\n" + "내용: $text\n" + "시간: ${java.util.Date(timestamp)}\n" + "\n", bginfo)
+                if(result != "0"){
+                    //알림 주는 코드
+                    Log.d("MainActivity", "Return Success!")
+                }
+            }
+        }
     }
 }
