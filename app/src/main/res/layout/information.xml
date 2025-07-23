@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/information">
+
+    <LinearLayout
+        android:layout_width="380dp"
+        android:layout_height="476dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_corner"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="받고 싶은 카톡내용을 적어주세요" />
+
+        <EditText
+            android:id="@+id/ed1"
+            android:layout_width="350dp"
+            android:layout_height="389dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:gravity="top"
+            android:hint="정보를 입력하세요"
+            android:inputType="text|textMultiLine"
+            android:scrollHorizontally="false"
+            android:singleLine="false"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="저장"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="20dp"
+        android:background="@drawable/rounded_corner">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작성하면 좋은 것들:"
+            android:layout_marginTop="10dp"
+            android:textSize="16sp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="12sp"
+            android:text="- 이름\n- 나이\n- 성별\n- 직업\n- 취미\n- 가족관계\n- 친구관계\n- 관심사\n(정보가 많을수록 정확해집니다)"/>
+
+    </LinearLayout>
+
+</LinearLayout>

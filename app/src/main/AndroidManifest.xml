@@ -12,9 +12,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/tetramenai"
+        android:label="TetramenAI"
+        android:roundIcon="@drawable/tetramenai"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
@@ -38,7 +38,14 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
+        <activity android:name=".Logger"
+            android:exported="false" />
+        <activity android:name=".Information"
+            android:exported="false"/>
+        <activity android:name=".Changelog"
+            android:exported="false"/>
+        <activity android:name=".Credits"
+            android:exported="false"/>
     </application>
 
 </manifest>
