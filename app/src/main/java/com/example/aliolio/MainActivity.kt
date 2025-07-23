@@ -207,8 +207,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         // 알림 정보를 UI에 표시하는 로직
         // 예: RecyclerView 업데이트, 텍스트뷰 업데이트 등
-        //if(((title != null && text != null) && !(savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}"))) || packageName!! != "com.android.systemui") savedlog = "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + savedlog
-        if((title == null && text == null) || (savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}")) || packageName!! == "com.android.systemui" || (packageName == "com.samsung.android.messaging" && text == "메시지 보기"))
+        if((title == null && text == null) || (savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}")) || packageName!! == "com.android.systemui" || packageName == "com.samsung.android.incallui" || (packageName == "com.samsung.android.messaging" && text == "메시지 보기"))
         else savedlog = "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + savedlog
         val logg = findViewById<TextView>(R.id.tv1)
         val info = findViewById<EditText>(R.id.ed1)
