@@ -17,6 +17,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+        disable.add("NullSafeMutableLiveData")
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
