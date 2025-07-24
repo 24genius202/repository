@@ -213,20 +213,6 @@ class Logger : AppCompatActivity() {
         }
     }
 
-    private suspend fun preprocess(message: String, bginfo: String): String? {
-        return try {
-            val gpt = GPT()
-            var response:String? = ""
-            lifecycleScope.launch {
-                response = gpt.sendMessageWithSystem(message, bginfo)
-            }
-            response
-        } catch (e: Exception) {
-            Log.e("Logger", "GPT 처리 실패", e)
-            null
-        }
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         try {
@@ -252,6 +238,8 @@ class Logger : AppCompatActivity() {
         Instructions for phrase: Assistant must phrase the message into full sentences, with each important considered message using one sentence.
         No part of the background information or the result shall be stored, nor shall it affect any future determinations. 
         Think Deep. For Example: If the person's age is old, it is probable that the person considers health messages important.
+        Consider the target of the message. For example, if the user is young and is an employee, [Health information for elderly employees] is not important as this message targets only elderly employees.
+        Consider who the message is from. For example, if the user doesn't want any advertising messages, then any message that is considered an advertising message should be filtered.
         Assistant must phrase in the language used(or prefered) in background information unless given in background information.
         The given background information is: $userPrefs
     """.trimIndent()
@@ -260,7 +248,7 @@ class Logger : AppCompatActivity() {
             val safePackageName = packageName ?: ""
             val safetime = java.util.Date(timestamp) ?: ""
             val userPrompt = """
-        (Instructions: DO NOT RETURN THE MESSAGE BELOW AS WHOLE. ACKNOWLEDGE THE USER OF WHAT PLATFORM THE MESSAGE IS FROM, WHO SENT IT, WHAT ARE THE CONTENTS CONSIDERED IMPORTANT FOR THE USER AND WHY THE ASSISTANT THOUGHT IT WAS IMPORTANT, AND THE TIME IT WAS SENT)
+        (Instructions: DO NOT RETURN THE MESSAGE BELOW AS WHOLE. ACKNOWLEDGE THE USER OF WHAT PLATFORM THE MESSAGE IS FROM, WHO SENT IT, WHAT ARE THE CONTENTS CONSIDERED IMPORTANT FOR THE USER AND WHY THE ASSISTANT THOUGHT IT WAS IMPORTANT, AND THE TIME IT WAS SENT. ASSISTANT MUST ALWAYS EXPLAIN WHY IT CONSIDERED THE MESSAGE LIKE SO)
         패키지: $safePackageName
         제목: $safeTitle
         내용: $safeText
