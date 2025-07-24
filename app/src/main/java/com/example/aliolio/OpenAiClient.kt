@@ -10,7 +10,7 @@ import java.io.IOException
 
 object OpenAiClient {
     private const val TAG = "OpenAiClient"
-    private const val SERVER_URL = "http://172.30.1.88:3000/ask" // Raspberry Pi IP
+    private const val SERVER_URL = "https://www.yjproj.org/ask" // Raspberry Pi IP
 
     private val client = OkHttpClient()
 
