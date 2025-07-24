@@ -32,7 +32,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="10dp"
-            android:text="-개발자(개발 구현)"
+            android:text="-개발자(개발 구현)\n-서버 관리자"
             android:textSize="12sp"/>
 
     </LinearLayout>
@@ -67,7 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginTop="380dp"
-        android:text="돌아가기"
+        android:text="뒤로"
         android:textSize="15sp"
         android:layout_marginEnd="20dp"
         android:id="@+id/goback2"/>

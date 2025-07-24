@@ -1,6 +1,5 @@
 package com.example.aliolio
 
-import GPT
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -12,14 +11,16 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
 
 class Logger : AppCompatActivity() {
-    var savedlog: String = ""
+    private lateinit var stringstorage: StringStorage
 
     private val notificationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -43,6 +44,8 @@ class Logger : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        stringstorage = StringStorage(this)
 
         try {
             setContentView(R.layout.logger)
@@ -80,6 +83,17 @@ class Logger : AppCompatActivity() {
         }
 
         Log.d("Logger", "========== Logger onCreate 완료됨 ==========")
+
+        val logg = findViewById<TextView>(R.id.tv1)
+
+        logg.text = stringstorage.getString("svlog")
+
+        val reset = findViewById<Button>(R.id.reset)
+
+        reset.setOnClickListener {
+            stringstorage.saveString("svlog", "")
+            logg.text = stringstorage.getString("svlog")
+        }
     }
 
     override fun onStart() {
@@ -201,8 +215,11 @@ class Logger : AppCompatActivity() {
 
     private suspend fun preprocess(message: String, bginfo: String): String? {
         return try {
-            val gpt = GPT
-            val response = gpt.askGPTWithHistory(message, "Conversation History + $bginfo")
+            val gpt = GPT()
+            var response:String? = ""
+            lifecycleScope.launch {
+                response = gpt.sendMessageWithSystem(message, bginfo)
+            }
             response
         } catch (e: Exception) {
             Log.e("Logger", "GPT 처리 실패", e)
@@ -214,33 +231,80 @@ class Logger : AppCompatActivity() {
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         try {
             if((title == null && text == null) ||
-                (savedlog.contains("${text}") && savedlog.contains("${java.util.Date(timestamp)}")) ||
+                (stringstorage.getString("svlog").contains("${text}") && stringstorage.getString("svlog").contains("${java.util.Date(timestamp)}")) ||
                 packageName == "com.android.systemui" ||
                 packageName == "com.samsung.android.incallui" ||
                 (packageName == "com.samsung.android.messaging" && text == "메시지 보기")) {
                 return
             }
 
-            savedlog = "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + savedlog
+            applylog("패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n")
+//            stringstorage.saveString("svlog", "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + stringstorage.getString("svlog"))
 
             val logg = findViewById<TextView>(R.id.tv1)
-            logg?.text = savedlog
 
-            Log.d("Logger", "새 알림: $packageName - $title: $text")
+            val userPrefs = stringstorage.getString("preferences") ?: ""
 
-            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-            scope.launch {
-                try {
-                    val result = preprocess("패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n", "")
-                    if(result != "0" && result != null) {
-                        Log.d("Logger", "GPT 처리 성공!")
+            val systemPrompt = """
+        You are a helpful assistant who determines whether the following message is important for the user based on the given background information of the user. 
+        If so, phrase the message so that it only contains what is considered 'important' for the user. 
+        Else, return 0.
+        Instructions for phrase: Assistant must phrase the message into full sentences, with each important considered message using one sentence.
+        No part of the background information or the result shall be stored, nor shall it affect any future determinations. 
+        Think Deep. For Example: If the person's age is old, it is probable that the person considers health messages important.
+        Assistant must phrase in the language used(or prefered) in background information unless given in background information.
+        The given background information is: $userPrefs
+    """.trimIndent()
+            val safeTitle = title ?: ""
+            val safeText = text ?: ""
+            val safePackageName = packageName ?: ""
+            val safetime = java.util.Date(timestamp) ?: ""
+            val userPrompt = """
+        (Instructions: DO NOT RETURN THE MESSAGE BELOW AS WHOLE. ACKNOWLEDGE THE USER OF WHAT PLATFORM THE MESSAGE IS FROM, WHO SENT IT, WHAT ARE THE CONTENTS CONSIDERED IMPORTANT FOR THE USER AND WHY THE ASSISTANT THOUGHT IT WAS IMPORTANT, AND THE TIME IT WAS SENT)
+        패키지: $safePackageName
+        제목: $safeTitle
+        내용: $safeText
+        시간: $safetime
+    """.trimIndent()
+
+            if (systemPrompt.isBlank() || userPrompt.isBlank()) {
+                Log.e("NULLERROR", "⚠️ systemPrompt 또는 userPrompt가 비어 있음")
+                return
+            }
+
+            OpenAiClient.sendMessages(
+                systemPrompt=systemPrompt, userPrompt=userPrompt
+            ) { reply ->
+                if (reply != null) {
+                    runOnUiThread {
+                        Log.d("GPT 응답", reply)
+                        applylog(reply)
                     }
-                } catch (e: Exception) {
-                    Log.e("Logger", "GPT 코루틴 실패", e)
+                } else {
+                    Log.e("GPT 응답", "Null 응답")
                 }
             }
+
+//            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+//            scope.launch {
+//                try {
+//                    val result = preprocess("패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n", stringstorage.getString("preferences"))
+//                    if(result != "0" && result != null) {
+//                        Log.d("Logger", "GPT 처리 성공!")
+//                    }
+//                    stringstorage.saveString("svlog", "$result \n\n" + stringstorage.getString("svlog"))
+//                } catch (e: Exception) {
+//                    Log.e("Logger", "GPT 코루틴 실패", e)
+//                }
+//            }
         } catch (e: Exception) {
             Log.e("Logger", "알림 업데이트 실패", e)
         }
+    }
+
+    private fun applylog(logvalue:String = ""){
+        val logg = findViewById<TextView>(R.id.tv1)
+        stringstorage.saveString("svlog", "$logvalue\n\n" + stringstorage.getString("svlog"))
+        logg?.text = stringstorage.getString("svlog")
     }
 }
