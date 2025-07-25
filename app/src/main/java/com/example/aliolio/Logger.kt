@@ -1,11 +1,13 @@
 package com.example.aliolio
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -15,12 +17,15 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
 
 class Logger : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
+    private lateinit var pushNotification: PushNotification
+    private val PERMISSION_REQUEST_CODE = 1000
 
     private val notificationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -42,10 +47,21 @@ class Logger : AppCompatActivity() {
 
     private var isReceiverRegistered = false
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         stringstorage = StringStorage(this)
+
+        pushNotification = PushNotification(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+
+        // 알림 권한 요청 (Android 13 이상)
+        //requestNotificationPermission()
 
         try {
             setContentView(R.layout.logger)
@@ -213,13 +229,13 @@ class Logger : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         try {
             if((title == null && text == null) ||
                 (stringstorage.getString("svlog").contains("${text}") && stringstorage.getString("svlog").contains("${java.util.Date(timestamp)}")) ||
                 packageName == "com.android.systemui" ||
                 packageName == "com.samsung.android.incallui" ||
+                packageName == "com.example.aliolio" ||
                 (packageName == "com.samsung.android.messaging" && text == "메시지 보기")) {
                 return
             }
@@ -266,7 +282,12 @@ class Logger : AppCompatActivity() {
                 if (reply != null) {
                     runOnUiThread {
                         Log.d("GPT 응답", reply)
-                        applylog(reply)
+                        if(reply != "0"){
+                            applylog(reply)
+                            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                                pushNotification.sendBasicNotification("중요한 메시지: $safeTitle", safeText)
+                            }
+                        }
                     }
                 } else {
                     Log.e("GPT 응답", "Null 응답")
