@@ -3,6 +3,7 @@ package com.example.aliolio
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 
 class Credits: AppCompatActivity() {
@@ -12,6 +13,7 @@ class Credits: AppCompatActivity() {
         setContentView(R.layout.credits)
         val button = findViewById<Button>(R.id.goback2)
         button.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             finish()
         }
     }

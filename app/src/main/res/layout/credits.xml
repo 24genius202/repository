@@ -3,12 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginTop="20dp">
+    android:layout_marginTop="20dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="CREDITS"
+        android:textColor="#888888"
         android:gravity="center"
         android:textSize="25sp"/>
 
@@ -62,13 +64,15 @@
 
     </LinearLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/goback2"
+        style="@style/RoundedButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginTop="380dp"
+        android:hapticFeedbackEnabled="true"
         android:text="뒤로"
         android:textSize="15sp"
-        android:layout_marginEnd="20dp"
-        android:id="@+id/goback2"/>
+        android:layout_marginTop="380dp"
+        app:cornerRadius="16dp" />
 </LinearLayout>

@@ -6,6 +6,6 @@
     <corners android:radius="16dp" />
 
     <!-- 배경색 설정 -->
-    <solid android:color="#CECECE" />
+    <solid android:color="#CECECE"/>
 
 </shape>

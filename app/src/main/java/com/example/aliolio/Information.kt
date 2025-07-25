@@ -2,6 +2,7 @@ package com.example.aliolio
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 import android.widget.EditText
 
@@ -20,6 +21,7 @@ class Information: AppCompatActivity() {
 
         val button = findViewById<Button>(R.id.save)
         button.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             stringStorage.saveString("preferences", pref.text.toString())
             finish()
         }

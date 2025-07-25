@@ -5,11 +5,17 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
+import android.view.HapticFeedbackConstants
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val serviceIntent = Intent(this, ForegroundService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
 
         try {
             val loggerButton = findViewById<Button>(R.id.gotolog)
@@ -18,6 +24,7 @@ class MainActivity : AppCompatActivity() {
             val creditsbutton = findViewById<Button>(R.id.credits)
 
             loggerButton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 try {
                     Log.d("MainActivity", "Logger 버튼 클릭됨")
                     val intent = Intent(this, Logger::class.java)
@@ -28,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             settingsButton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 try {
                     Log.d("MainActivity", "Settings 버튼 클릭됨")
                     val intent = Intent(this, Information::class.java)
@@ -38,6 +46,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             changelogbutton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 try {
                     Log.d("MainActivity", "Changelog 버튼 클릭됨")
                     val intent = Intent(this, Changelog::class.java)
@@ -48,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             creditsbutton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 try {
                     Log.d("MainActivity", "Credits 버튼 클릭됨")
                     val intent = Intent(this, Credits::class.java)

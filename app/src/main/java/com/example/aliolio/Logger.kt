@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -21,6 +22,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
+import androidx.core.net.toUri
 
 class Logger : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
@@ -29,6 +31,15 @@ class Logger : AppCompatActivity() {
 
     private val notificationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            if (Intent.ACTION_BOOT_COMPLETED == intent!!.action) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val serviceIntent = Intent(context, ForegroundService::class.java)
+                    context!!.startForegroundService(serviceIntent)
+                } else {
+                    val serviceIntent = Intent(context, ForegroundService::class.java)
+                    context!!.startService(serviceIntent)
+                }
+            }
             Log.d("Logger", "브로드캐스트 수신됨!")
 
             val packageName = intent?.getStringExtra("package")
@@ -48,6 +59,7 @@ class Logger : AppCompatActivity() {
     private var isReceiverRegistered = false
 
 
+    @SuppressLint("ServiceCast", "BatteryLife", "ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,6 +70,16 @@ class Logger : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val packageName = packageName
+            val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                intent.data = "package:$packageName".toUri()
+                startActivity(intent)
+            }
         }
 
         // 알림 권한 요청 (Android 13 이상)
@@ -79,6 +101,7 @@ class Logger : AppCompatActivity() {
             // 뒤로가기 버튼 설정
             val backButton = findViewById<Button>(R.id.goback)
             backButton?.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 Log.d("Logger", "뒤로가기 버튼 클릭")
                 finish()
             }
@@ -107,6 +130,7 @@ class Logger : AppCompatActivity() {
         val reset = findViewById<Button>(R.id.reset)
 
         reset.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             stringstorage.saveString("svlog", "")
             logg.text = stringstorage.getString("svlog")
         }

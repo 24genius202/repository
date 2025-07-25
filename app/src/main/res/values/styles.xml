@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 앱 전역 스타일 (기본 테마 등) -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- 기본 테마 설정 -->
+    </style>
+
+    <!-- ✅ 커스텀 버튼 스타일 -->
+    <style name="RoundedButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">16dp</item>
+        <item name="backgroundTint">#CECECE</item>
+    </style>
+
+</resources>
