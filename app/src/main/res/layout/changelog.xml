@@ -55,7 +55,7 @@
                         android:layout_gravity="end"
                         android:layout_marginTop="10dp"
                         android:layout_marginEnd="10dp"
-                        android:text="2025/07/25"
+                        android:text="2025/07/26"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         android:textSize="12sp" />
@@ -68,7 +68,7 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="10dp"
-                    android:text="-정식 출시\n-미니멀 디자인으로 디자인 수정\n-서버 24시간 가동"
+                    android:text="-정식 출시\n-미니멀 디자인으로 디자인 수정\n-서버 24시간 가동\n-ABOUT 페이지 추가\n-버튼 배열 수정"
                     android:textSize="12sp"/>
 
             </LinearLayout>

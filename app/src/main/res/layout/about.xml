@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ABOUT"
+        android:textColor="#888888"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:textSize="25sp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="620dp"
+            app:layout_constraintBottom_toTopOf="@+id/goback3"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_corner">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:text="사용 방법:"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="1. 설정창에서 본인에 관한 정보/받고 싶은 메시지/받고 싶지 않은 메시지 등을 작성하고 저장 버튼을 누른다\n\n2. 로그 페이지에 들어간다"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_corner">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:text="출시 예정:"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="-개인화 딥러닝 기술 도입\n-GPT 정확도 개선"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/goback3"
+            style="@style/RoundedButtonStyle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:hapticFeedbackEnabled="true"
+            android:text="뒤로"
+            android:textSize="15sp"
+            app:cornerRadius="16dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

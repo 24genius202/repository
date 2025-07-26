@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="V1.0.0"
         android:textColor="#888888"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -62,15 +62,28 @@
         android:hapticFeedbackEnabled="true" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/credits"
+        android:id="@+id/about"
         android:layout_width="200dp"
         android:layout_height="60dp"
         android:layout_marginTop="50dp"
-        android:text="CREDITS"
+        android:text="ABOUT"
         android:textSize="19sp"
         android:layout_gravity="center"
         app:cornerRadius="16dp"
         style="@style/RoundedButtonStyle"
         android:hapticFeedbackEnabled="true" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/credits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginTop="60dp"
+        android:backgroundTint="#00000000"
+        android:hapticFeedbackEnabled="true"
+        android:text="CREDITS"
+        android:textColor="#888888"
+        android:textSize="15sp"
+        android:textStyle="italic"/>
 
 </LinearLayout>

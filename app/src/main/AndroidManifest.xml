@@ -69,6 +69,8 @@
             android:exported="false"/>
         <activity android:name=".Credits"
             android:exported="false"/>
+        <activity android:name=".About"
+            android:exported="false"/>
     </application>
 
 </manifest>

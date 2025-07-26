@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.core.content.ContextCompat
 
@@ -22,6 +21,7 @@ class MainActivity : AppCompatActivity() {
             val settingsButton = findViewById<Button>(R.id.gotosettings)
             val changelogbutton = findViewById<Button>(R.id.changelog)
             val creditsbutton = findViewById<Button>(R.id.credits)
+            val aboutbutton = findViewById<Button>(R.id.about)
 
             loggerButton.setOnClickListener {
                 it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -64,6 +64,17 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 } catch (e: Exception) {
                     Log.e("MainActivity", "Credits 이동 실패", e)
+                }
+            }
+
+            aboutbutton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                try {
+                    Log.d("MainActivity", "About 버튼 클릭됨")
+                    val intent = Intent(this, About::class.java)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "About 이동 실패", e)
                 }
             }
         } catch (e: Exception) {

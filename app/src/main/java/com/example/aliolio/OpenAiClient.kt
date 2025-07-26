@@ -10,7 +10,7 @@ import java.io.IOException
 
 object OpenAiClient {
     private const val TAG = "OpenAiClient"
-    private const val SERVER_URL = "https://www.yjproj.org/ask" // Raspberry Pi IP
+    private const val SERVER_URL = "https://www.yjproj.org/tetramenai-gpt" // Raspberry Pi IP
 
     private val client = OkHttpClient()
 
@@ -20,8 +20,8 @@ object OpenAiClient {
         val safeUserPrompt = userPrompt ?: ""
 
         val messages = JSONArray().apply {
-            put(JSONObject().put("role", "system").put("content", safeSystemPrompt))
-            put(JSONObject().put("role", "user").put("content", safeUserPrompt))
+            put(JSONObject().put("role", "system").put("content", "Background Information: $safeSystemPrompt"))
+            put(JSONObject().put("role", "user").put("content", "Message: $safeUserPrompt"))
         }
 
         val json = JSONObject().put("messages", messages)
