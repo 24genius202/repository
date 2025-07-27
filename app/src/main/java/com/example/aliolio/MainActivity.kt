@@ -9,12 +9,22 @@ import android.view.HapticFeedbackConstants
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var stringstorage: StringStorage
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        stringstorage = StringStorage(this)
+
         val serviceIntent = Intent(this, ForegroundService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
+
+        if(stringstorage.getString("entercnt", "0") == "0"){
+            val intent = Intent(this, Agreement_Popup::class.java)
+            startActivity(intent)
+            stringstorage.saveString("entercnt", "1")
+        }
 
         try {
             val loggerButton = findViewById<Button>(R.id.gotolog)

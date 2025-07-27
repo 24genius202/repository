@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="개인정보 수집 및 이용 동의"
+        android:textSize="20sp"
+        android:layout_marginBottom="10dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:textSize="13sp"
+            android:text="수집하는 개인정보 항목:\n이름, 나이, 또는 사용자가 제공하는 모든 개인정보, 휴대폰으로 오는 모든 알림\n\n수집 및 이용 목적: 서비스 제공(개인 맞춤형 알림 필터링 서비스)\n\n보유 및 이용 기간: 앱 삭제 시까지\n\n귀하가 수신한 알림에는 제3자의 개인정보가 포함될 수 있습니다. 이 정보는 서비스 제공을 위한 분석 및 처리 목적으로 사용되며, 해당 정보의 수집 및 전송에 대해 귀하가 적법하게 권한을 가지고 있음을 확인합니다.\n\n귀하는 개인정보 수집 및 이용에 동의하지 않을 권리가 있으며, 동의 거부 시 서비스 이용이 불가합니다"/>
+
+    </ScrollView>
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/agreecollectiongroup"
+        android:layout_gravity="end">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/collection_disagree"
+            android:text="동의하지 않음"
+            android:layout_marginEnd="10dp"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/collection_agree"
+            android:text="동의함"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="개인정보 제3자 제공 동의"
+        android:textSize="20sp"
+        android:layout_marginBottom="10dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:textSize="13sp"
+            android:text="제공받는 자: OpenAI (GPT 4o)\n\n제공 항목: 이름, 나이, 또는 사용자가 제공하는 모든 개인정보, 휴대폰으로 오는 모든 알림\n\n※ 알림 내용에는 귀하 외 제3자의 개인정보(이름, 연락처, 메시지 등)가 포함될 수 있습니다.\n\n귀하는 제3자의 개인정보를 포함한 알림 데이터를 본 서비스 제공을 위해 제3자에게 제공하는 데 동의하며, 이로 인해 발생할 수 있는 법적 책임에 대해 사용자 본인이 책임짐을 확인합니다.\n\n제공 목적: 서비스 제공(알림 필터링 서비스)\n\n보유 및 이용 기간: GPT 4o 프롬프트 지침에는 사용자의 개인정보를 저장하지 못하게 규정하였으나 OpenAI사의 운영정책에 따라 일정 기간 보유될 수 있음\n\n귀하는 개인정보 제3자 제공에 동의하지 않을 권리가 있으며, 동의 거부 시 서비스 이용이 불가합니다"/>
+
+    </ScrollView>
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/agreeprovidegroup"
+        android:layout_gravity="end">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/provide_disagree"
+            android:text="동의하지 않음"
+            android:layout_marginEnd="10dp"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/provide_agree"
+            android:text="동의함"/>
+
+    </RadioGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cornerRadius="16dp"
+        android:text="확인"
+        android:backgroundTint="#CDCDCD"
+        android:layout_gravity="end"
+        android:id="@+id/agreementsave"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>

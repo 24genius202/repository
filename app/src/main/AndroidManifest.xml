@@ -71,6 +71,8 @@
             android:exported="false"/>
         <activity android:name=".About"
             android:exported="false"/>
+        <activity android:name=".Agreement_Popup"
+            android:exported="false"/>
     </application>
 
 </manifest>
