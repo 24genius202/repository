@@ -79,7 +79,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginBottom="15dp"
-                        android:text="-개인화 딥러닝 기술 도입\n-GPT 정확도 개선"/>
+                        android:text="-개인화 딥러닝 기술 정확도 개선\n-GPT 정확도 개선"/>
 
                 </LinearLayout>
 

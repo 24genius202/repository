@@ -73,6 +73,10 @@
             android:exported="false"/>
         <activity android:name=".Agreement_Popup"
             android:exported="false"/>
+        <activity android:name=".DeepLearnStats"
+            android:exported="false"/>
+        <activity android:name=".PersonalInformationUsage"
+            android:exported="false"/>
     </application>
 
 </manifest>

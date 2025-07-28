@@ -11,13 +11,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="개인정보 수집 및 이용 동의"
+        android:text="개인정보 수집 및 이용 방침"
         android:textSize="20sp"
         android:layout_marginBottom="10dp"/>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp">
+        android:layout_height="200dp"
+        android:scrollbarAlwaysDrawVerticalTrack="true">
 
         <TextView
             android:layout_width="match_parent"
@@ -25,7 +26,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
             android:textSize="13sp"
-            android:text="개인정보 수집 및 이용에 대한 동의서\n
+            android:text="개인정보 수집 및 이용에 대한 안내\n
 \n
 1. 수집하는 개인정보 항목:\n
 \t\t\t\t\t\t- 사용자가 앱에 입력하거나 제공한 모든 정보 (이름, 나이 등)\n
@@ -48,39 +49,18 @@
 
     </ScrollView>
 
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/agreecollectiongroup"
-        android:layout_gravity="end">
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/collection_disagree"
-            android:text="동의하지 않음"
-            android:layout_marginEnd="10dp"/>
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/collection_agree"
-            android:text="동의함"/>
-
-    </RadioGroup>
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="개인정보 제3자 제공 동의"
+        android:layout_marginTop="80dp"
+        android:text="개인정보 제3자 제공 방침"
         android:textSize="20sp"
         android:layout_marginBottom="10dp"/>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp">
+        android:layout_height="200dp"
+        android:scrollbarAlwaysDrawVerticalTrack="true">
 
         <TextView
             android:layout_width="match_parent"
@@ -88,7 +68,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
             android:textSize="13sp"
-            android:text="개인정보 제3자 제공에 대한 동의서\n
+            android:text="개인정보 제3자 제공에 대한 안내\n
 \n
 1. 제공받는 자:\n
 \t\t\t\t\t\t- OpenAI, L.L.C. (ChatGPT / GPT-4o 운영 주체)\n
@@ -121,36 +101,20 @@
 
     </ScrollView>
 
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/agreeprovidegroup"
-        android:layout_gravity="end">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="end">
 
-        <RadioButton
+        <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/provide_disagree"
-            android:text="동의하지 않음"
-            android:layout_marginEnd="10dp"/>
+            android:layout_gravity="bottom"
+            android:backgroundTint="#CDCDCD"
+            android:text="뒤로"
+            android:id="@+id/goback5"/>
 
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/provide_agree"
-            android:text="동의함"/>
+    </LinearLayout>
 
-    </RadioGroup>
-
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cornerRadius="16dp"
-        android:text="확인"
-        android:backgroundTint="#CDCDCD"
-        android:layout_gravity="end"
-        android:id="@+id/agreementsave"
-        android:layout_marginTop="10dp"/>
 
 </LinearLayout>

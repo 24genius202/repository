@@ -2,6 +2,7 @@ package com.example.aliolio
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.RadioGroup
@@ -17,24 +18,24 @@ class Agreement_Popup : AppCompatActivity() {
             .setView(dialogView)
             .setCancelable(false)
             .create()
-
-        val agreeCollectionGroup = dialogView.findViewById<RadioGroup>(R.id.agreecollectiongroup)
-        val agreeProvideGroup = dialogView.findViewById<RadioGroup>(R.id.agreeprovidegroup)
-        val saveButton = dialogView.findViewById<Button>(R.id.agreementsave)
+        val agreecollectiongroup = dialogView.findViewById<RadioGroup>(R.id.agreecollectiongroup)
+        val agreeprovidegroup = dialogView.findViewById<RadioGroup>(R.id.agreeprovidegroup)
+        val save = dialogView.findViewById<Button>(R.id.agreementsave)
 
         var agree1 = false
         var agree2 = false
 
-        agreeCollectionGroup.setOnCheckedChangeListener { _, checkedId ->
+        agreecollectiongroup.setOnCheckedChangeListener { _, checkedId ->
             agree1 = (checkedId == R.id.collection_agree)
         }
 
-        agreeProvideGroup.setOnCheckedChangeListener { _, checkedId ->
+        agreeprovidegroup.setOnCheckedChangeListener { _, checkedId ->
             agree2 = (checkedId == R.id.provide_agree)
         }
 
-        saveButton.setOnClickListener {
+        save.setOnClickListener {
             if (agree1 && agree2) {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 dialog.dismiss()
                 finish()
             }

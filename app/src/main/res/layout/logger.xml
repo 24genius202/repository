@@ -63,6 +63,21 @@
             android:textSize="15sp"
             app:cornerRadius="16dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/gotodeeplearnstats"
+            style="@style/RoundedButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            app:layout_constraintStart_toEndOf="@id/reset"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:hapticFeedbackEnabled="true"
+            android:layout_marginStart="10dp"
+            android:text="딥러닝 현황"
+            android:textSize="15sp"
+            app:cornerRadius="16dp" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/goback"

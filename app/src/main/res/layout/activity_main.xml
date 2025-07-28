@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="V1.0.0"
+        android:text="V2.0.0"
         android:textColor="#888888"
         android:textSize="18sp" />
 
@@ -73,17 +73,42 @@
         style="@style/RoundedButtonStyle"
         android:hapticFeedbackEnabled="true" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/credits"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginTop="60dp"
-        android:backgroundTint="#00000000"
-        android:hapticFeedbackEnabled="true"
-        android:text="CREDITS"
-        android:textColor="#888888"
-        android:textSize="15sp"
-        android:textStyle="italic"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/credits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_gravity="start"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="#00000000"
+            android:hapticFeedbackEnabled="true"
+            android:text="CREDITS"
+            android:textColor="#888888"
+            android:textSize="15sp"
+            android:textStyle="italic"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/personalinformationusage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="start"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="#00000000"
+            android:hapticFeedbackEnabled="true"
+            android:text="개인정보처리방침"
+            android:textColor="#888888"
+            android:textSize="13sp"
+            android:textStyle="italic"/>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import android.view.HapticFeedbackConstants
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
             val changelogbutton = findViewById<Button>(R.id.changelog)
             val creditsbutton = findViewById<Button>(R.id.credits)
             val aboutbutton = findViewById<Button>(R.id.about)
+            val piubutton = findViewById<MaterialButton>(R.id.personalinformationusage)
 
             loggerButton.setOnClickListener {
                 it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -85,6 +87,17 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 } catch (e: Exception) {
                     Log.e("MainActivity", "About 이동 실패", e)
+                }
+            }
+
+            piubutton.setOnClickListener {
+                it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                try {
+                    Log.d("MainActivity", "PIU 버튼 클릭됨")
+                    val intent = Intent(this, PersonalInformationUsage::class.java)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "PIU 이동 실패", e)
                 }
             }
         } catch (e: Exception) {

@@ -23,6 +23,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.*
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
+import java.util.Date
 
 class Logger : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
@@ -133,6 +135,16 @@ class Logger : AppCompatActivity() {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             stringstorage.saveString("svlog", "")
             logg.text = stringstorage.getString("svlog")
+        }
+
+        val gotodeeplearnstats = findViewById<Button>(R.id.gotodeeplearnstats)
+
+        gotodeeplearnstats.isVisible = stringstorage.getString("DeepLearningEnable", "0") != "0"
+
+        gotodeeplearnstats.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            val intent = Intent(this, DeepLearnStats::class.java)
+            startActivity(intent)
         }
     }
 
@@ -288,31 +300,66 @@ class Logger : AppCompatActivity() {
                 return
             }
 
-            OpenAiClient.sendMessages(
-                systemPrompt=userPrefs, userPrompt=userPrompt
-            ) { reply ->
-                if (reply != null) {
-                    runOnUiThread {
-                        Log.d("GPT 응답", reply)
-                        if(reply != "0"){
-                            applylog(reply)
-                            if(!reply.contains("This endpoint is deprecated")) {
-                                if (ActivityCompat.checkSelfPermission(
-                                        this,
-                                        Manifest.permission.POST_NOTIFICATIONS
-                                    ) == PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    pushNotification.sendBasicNotification(
-                                        "중요한 메시지: $safeTitle",
-                                        safeText
-                                    )
+            val fixedpackagename = packageName!!.split(".")[1]
+
+            if(stringstorage.getString("DeepLearningEnable", "0") == "0") {
+                OpenAiClient.sendMessages(
+                    systemPrompt = userPrefs, userPrompt = userPrompt
+                ) { reply ->
+                    if (reply != null) {
+                        runOnUiThread {
+                            Log.d("GPT 응답", reply)
+                            if (reply != "0") {
+                                applylog(reply)
+                                if (!reply.contains("This endpoint is deprecated")) {
+                                    if (ActivityCompat.checkSelfPermission(
+                                            this,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        pushNotification.sendBasicNotification(
+                                            "중요한 메시지: $safeTitle",
+                                            safeText
+                                        )
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        Log.e("GPT 응답", "Null 응답")
                     }
-                } else {
-                    Log.e("GPT 응답", "Null 응답")
                 }
+            } else{
+                OpenAiClient.sendMessageswithDeepLearn(
+                    systemPrompt1 = stringstorage.getString(title + "@" + fixedpackagename, "@@@@@@@") ,systemPrompt2 = userPrefs, userPrompt = userPrompt
+                ) { reply ->
+                    if (reply != null) {
+                        runOnUiThread {
+                            Log.d("GPT(DL) 응답", reply)
+                            if (reply != "0") {
+                                applylog(reply)
+                                if (!reply.contains("This endpoint is deprecated")) {
+                                    if (ActivityCompat.checkSelfPermission(
+                                            this,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        pushNotification.sendBasicNotification(
+                                            "중요한 메시지: $safeTitle",
+                                            safeText
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Log.e("GPT(DL) 응답", "Null 응답")
+                    }
+                }
+            }
+
+            if(stringstorage.getString("DeepLearningEnable", "0") != "0"){
+                deeplearncycle(safePackageName, safeTitle, safeText, timestamp)
             }
 
 //            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -336,5 +383,40 @@ class Logger : AppCompatActivity() {
         val logg = findViewById<TextView>(R.id.tv1)
         stringstorage.saveString("svlog", "$logvalue\n\n" + stringstorage.getString("svlog"))
         logg?.text = stringstorage.getString("svlog")
+    }
+
+    private fun deeplearncycle(packageName: String?, title: String?, text: String?, timestamp: Long){
+        val fixedpackagename = packageName!!.split(".")[1]
+        val fixedtimestamp = java.sql.Date(timestamp)
+        //value seperator는 @로 함
+        //steve@kakaotalk: <관계>@<Formal>@<Friendly>@<Close>@<Transactional>@<Hierarchical>@<Conflicted>@<요약본>
+        //이미 있는 사람인지 확인
+        if(stringstorage.getString(title+ "@" + fixedpackagename, "") == ""){
+            stringstorage.saveString(title+"@"+fixedpackagename, "@@@@@@@")
+            stringstorage.saveString("savedpeople", title+"@"+fixedpackagename+"|"+stringstorage.getString("savedpeople", "Self@self"))
+        }
+
+        val safeTitle = title ?: ""
+        val safeText = text ?: ""
+        val safePackageName = fixedpackagename ?: ""
+        val safetime = java.util.Date(timestamp) ?: ""
+        val usrPrompt = """
+        플랫폼: $safePackageName
+        제목: $safeTitle
+        내용: $safeText
+        시간: $safetime
+    """.trimIndent()
+
+        OpenAiClient.sendDeepLearnMessages(
+            systemPrompt = stringstorage.getString(title+"@"+fixedpackagename), userPrompt = usrPrompt
+        ){ reply ->
+            if (reply != null){
+                runOnUiThread {
+                    Log.d("DeepLearnCycle", reply)
+                    stringstorage.saveString(title+"@"+fixedpackagename, reply)
+                    Log.d("DeepLearnCycle", "Updated Weight")
+                }
+            }
+        }
     }
 }
