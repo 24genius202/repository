@@ -45,7 +45,7 @@ class Information: AppCompatActivity() {
                         // 확인 버튼 클릭 시 동작
                         AlertDialog.Builder(this)
                             .setTitle("안내")
-                            .setMessage("개인화 딥러닝 기술은 아직 BETA TESTING 단계로, 정확하지 않을 수 있습니다.")
+                            .setMessage("개인화 딥러닝 기술은 아직 BETA TESTING 단계로, 정확하지 않을 수 있습니다.(DL V1.5)")
                             .setPositiveButton("확인했습니다") { dialog, _ ->
                                 // 확인 버튼 클릭 시 동작
                                 stringStorage.saveString("DeepLearningEnable", "1")
