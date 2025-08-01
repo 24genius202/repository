@@ -52,7 +52,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginBottom="15dp"
-                        android:text="1. 설정창에서 본인에 관한 정보/받고 싶은 메시지/받고 싶지 않은 메시지 등을 작성하고 저장 버튼을 누른다\n\n2. 로그 페이지에 들어간다"/>
+                        android:text="1. 설정창에서 본인에 관한 정보/받고 싶은 메시지/받고 싶지 않은 메시지 등을 작성하고 저장 버튼을 누른다\n\n2. 로그 페이지에 들어간다(로그 페이지를 열어 놓아야지 정상작동한다)\n\n3. 본인 할 일을 한다"/>
 
                 </LinearLayout>
 
@@ -80,6 +80,33 @@
                         android:layout_marginEnd="10dp"
                         android:layout_marginBottom="15dp"
                         android:text="-개인화 딥러닝 기술 정확도 개선\n-GPT 정확도 개선"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_corner">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:text="개인화 딥러닝 기술 안내:"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="개인화 딥러닝 기술(이하 DL)은 일상 메시지에서 사용자와 발신자간의 관계를 알아내, 더 정확한 개인화 메시지 필터링 기능을 가능하게 한다.\n\nDL은 설정창에서 켜고 끌 수 있으며, 기본값은 '사용 안함'이다.\n\n사용 설정 후 LOG 페이지에 '딥러닝 현황' 버튼이 생겼을 것이다. 버튼을 누르면 딥러닝 현황을 쉽게 볼 수 있다.\n\n사용 설정할 경우, 매일 오전 4시에 사용자의 메시지 내용과 발신 시각, 발신 플랫폼 등이 OpenAI GPT 4o에 전송되나, 프롬프트는 전송사항을 저장하지 말것을 강조하고 있다. 그러나 OpenAI사의 정책에 의해 일부 기록될 수도 있다.(개인정보처리방침 참고)\n귀하는 이미 위 내용의 개인정보 전송 및 취급 관련 내용에 동의하였으며, 동의 철회를 희망하는 경우 해당 어플리케이션을 삭제하면 자동으로 철회된다.\n\n처리가 끝난 정보는 사용자의 휴대폰 내에 저장된다."/>
 
                 </LinearLayout>
 

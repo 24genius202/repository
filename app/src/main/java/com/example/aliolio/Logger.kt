@@ -25,9 +25,14 @@ import kotlinx.coroutines.*
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import java.util.Date
+import java.util.Calendar
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class Logger : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
+    private lateinit var messagestorage: StringStorage
+    private lateinit var deeplearnstorage: StringStorage
     private lateinit var pushNotification: PushNotification
     private val PERMISSION_REQUEST_CODE = 1000
 
@@ -66,6 +71,8 @@ class Logger : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         stringstorage = StringStorage(this)
+        messagestorage = StringStorage(this)
+        deeplearnstorage = StringStorage(this)
 
         pushNotification = PushNotification(this)
 
@@ -82,6 +89,16 @@ class Logger : AppCompatActivity() {
                 intent.data = "package:$packageName".toUri()
                 startActivity(intent)
             }
+        }
+
+        val calendar = Calendar.getInstance()
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        var lastday = stringstorage.getString("lastday", "0")
+
+        if(stringstorage.getString("DeepLearningEnable", "0") != "0" && day.toString() != lastday && hour == 4){
+            stringstorage.saveString("lastday", day.toString())
+            deeplearncycle()
         }
 
         // 알림 권한 요청 (Android 13 이상)
@@ -105,6 +122,7 @@ class Logger : AppCompatActivity() {
             backButton?.setOnClickListener {
                 it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 Log.d("Logger", "뒤로가기 버튼 클릭")
+
                 finish()
             }
         } catch (e: Exception) {
@@ -330,6 +348,32 @@ class Logger : AppCompatActivity() {
                     }
                 }
             } else{
+                val client = messagestorage.getString(safeTitle + "@" + fixedpackagename, "")
+//문자열 리스트 escape 처리 적용
+                val newEntry = encode(listOf(safeText, java.util.Date(timestamp).toString()))
+
+                if (client != "") {
+                    messagestorage.saveString(
+                        safeTitle + "@" + fixedpackagename,
+                        client + " " + newEntry
+                    )
+                } else {
+                    messagestorage.saveString(
+                        safeTitle + "@" + fixedpackagename,
+                        newEntry
+                    )
+                }
+
+//문자열 리스트 escape 처리 적용
+                val clients = messagestorage.getString("clients", "")
+                val clientList = if (clients.isNotEmpty()) decode(clients).toMutableList() else mutableListOf()
+
+                if (!clientList.contains(safeTitle + "@" + fixedpackagename)) {
+                    if (client != "") {
+                        clientList.add(safeTitle + "@" + fixedpackagename)
+                        messagestorage.saveString("clients", encode(clientList)) // 🔧 escape 적용 저장
+                    }
+                }
                 OpenAiClient.sendMessageswithDeepLearn(
                     systemPrompt1 = stringstorage.getString(title + "@" + fixedpackagename, "@@@@@@@") ,systemPrompt2 = userPrefs, userPrompt = userPrompt
                 ) { reply ->
@@ -358,10 +402,6 @@ class Logger : AppCompatActivity() {
                 }
             }
 
-            if(stringstorage.getString("DeepLearningEnable", "0") != "0"){
-                deeplearncycle(safePackageName, safeTitle, safeText, timestamp)
-            }
-
 //            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 //            scope.launch {
 //                try {
@@ -385,38 +425,36 @@ class Logger : AppCompatActivity() {
         logg?.text = stringstorage.getString("svlog")
     }
 
-    private fun deeplearncycle(packageName: String?, title: String?, text: String?, timestamp: Long){
-        val fixedpackagename = packageName!!.split(".")[1]
-        val fixedtimestamp = java.sql.Date(timestamp)
-        //value seperator는 @로 함
-        //steve@kakaotalk: <관계>@<Formal>@<Friendly>@<Close>@<Transactional>@<Hierarchical>@<Conflicted>@<요약본>
-        //이미 있는 사람인지 확인
-        if(stringstorage.getString(title+ "@" + fixedpackagename, "") == ""){
-            stringstorage.saveString(title+"@"+fixedpackagename, "@@@@@@@")
-            stringstorage.saveString("savedpeople", title+"@"+fixedpackagename+"|"+stringstorage.getString("savedpeople", "Self@self"))
-        }
+    private fun deeplearncycle(){
+        val clients = messagestorage.getString("clients", "")
+        val clientList = if (clients.isNotEmpty()) decode(clients).map { it.trim() }.filter { it.isNotEmpty() } else emptyList()
+// 🔧 decode 적용
+        if (clients != "") {
+            for (i in clientList) {
+                val index = i
+                // value separator는 @로 함
+                // steve@kakaotalk: <관계>@<Formal>@<Friendly>@<Close>@<Transactional>@<Hierarchical>@<Conflicted>@<요약본>
+                val usrPrompt = messagestorage.getString(index)
 
-        val safeTitle = title ?: ""
-        val safeText = text ?: ""
-        val safePackageName = fixedpackagename ?: ""
-        val safetime = java.util.Date(timestamp) ?: ""
-        val usrPrompt = """
-        플랫폼: $safePackageName
-        제목: $safeTitle
-        내용: $safeText
-        시간: $safetime
-    """.trimIndent()
-
-        OpenAiClient.sendDeepLearnMessages(
-            systemPrompt = stringstorage.getString(title+"@"+fixedpackagename), userPrompt = usrPrompt
-        ){ reply ->
-            if (reply != null){
-                runOnUiThread {
-                    Log.d("DeepLearnCycle", reply)
-                    stringstorage.saveString(title+"@"+fixedpackagename, reply)
-                    Log.d("DeepLearnCycle", "Updated Weight")
+                OpenAiClient.sendDeepLearnMessages(
+                    systemPrompt = deeplearnstorage.getString(index),
+                    userPrompt = usrPrompt
+                ) { reply ->
+                    if (reply != null) {
+                        runOnUiThread {
+                            Log.d("DeepLearnCycle", reply)
+                            deeplearnstorage.saveString(index, reply)
+                            Log.d("DeepLearnCycle", "Updated Weight")
+                        }
+                    }
                 }
             }
         }
     }
+
+    fun escape(s: String): String = s.replace(",", "<<COMMA>>")
+    fun unescape(s: String): String = s.replace("<<COMMA>>", ",")
+
+    fun encode(list: List<String>): String = list.joinToString(",") { escape(it) }
+    fun decode(encoded: String): List<String> = encoded.split(",").map { unescape(it) }
 }

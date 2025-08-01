@@ -34,7 +34,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="10dp"
-            android:text="-개발자(개발 구현)\n-서버 관리자"
+            android:text="-메인 개발자(개발 구현)\n-서버 관리자"
             android:textSize="12sp"/>
 
     </LinearLayout>
@@ -59,7 +59,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="10dp"
-            android:text="-개발 검토\n-개발 아이디어 고안"
+            android:text="-개발 검토\n-개발 아이디어 고안\n-테스트"
             android:textSize="12sp"/>
 
     </LinearLayout>
