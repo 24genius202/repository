@@ -1,4 +1,4 @@
-package com.example.aliolio
+package com.example.tetramenai
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

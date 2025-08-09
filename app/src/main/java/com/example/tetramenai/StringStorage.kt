@@ -1,4 +1,4 @@
-package com.example.aliolio
+package com.uselessdev.tetramenai
 
 // ===== StringStorage.kt - 문자열 저장/불러오기 클래스 =====
 import android.content.Context

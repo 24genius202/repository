@@ -1,4 +1,4 @@
-package com.example.aliolio
+package com.uselessdev.tetramenai
 
 import android.util.Log
 import android.widget.TextView

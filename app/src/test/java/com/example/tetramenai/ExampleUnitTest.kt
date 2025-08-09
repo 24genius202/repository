@@ -1,4 +1,4 @@
-package com.example.aliolio
+package com.example.tetramenai
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.example.aliolio
+package com.uselessdev.tetramenai
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -14,45 +14,38 @@ import android.provider.Settings
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.*
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import java.util.Date
 import java.util.Calendar
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.uselessdev.tetramenai.DataBase
+import java.util.jar.Attributes
 
 class Logger : AppCompatActivity() {
     private lateinit var stringstorage: StringStorage
     private lateinit var messagestorage: StringStorage
     private lateinit var deeplearnstorage: StringStorage
     private lateinit var pushNotification: PushNotification
+    private lateinit var namestorage: StringStorage
+    private lateinit var rawdata: StringStorage
     private val PERMISSION_REQUEST_CODE = 1000
 
     private val notificationReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (Intent.ACTION_BOOT_COMPLETED == intent!!.action) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val serviceIntent = Intent(context, ForegroundService::class.java)
-                    context!!.startForegroundService(serviceIntent)
-                } else {
-                    val serviceIntent = Intent(context, ForegroundService::class.java)
-                    context!!.startService(serviceIntent)
-                }
+                val serviceIntent = Intent(context, ForegroundService::class.java)
+                context!!.startForegroundService(serviceIntent)
             }
             Log.d("Logger", "브로드캐스트 수신됨!")
 
-            val packageName = intent?.getStringExtra("package")
-            val title = intent?.getStringExtra("title")
-            val text = intent?.getStringExtra("text")
-            val timestamp = intent?.getLongExtra("timestamp", 0L)
+            val packageName = intent.getStringExtra("package")
+            val title = intent.getStringExtra("title")
+            val text = intent.getStringExtra("text")
+            val timestamp = intent.getLongExtra("timestamp", 0L)
 
             Log.d("Logger", "받은 데이터 - 패키지: $packageName, 제목: $title, 내용: $text")
 
@@ -73,6 +66,7 @@ class Logger : AppCompatActivity() {
         stringstorage = StringStorage(this)
         messagestorage = StringStorage(this)
         deeplearnstorage = StringStorage(this)
+        namestorage = StringStorage(this)
 
         pushNotification = PushNotification(this)
 
@@ -98,7 +92,8 @@ class Logger : AppCompatActivity() {
 
         if(stringstorage.getString("DeepLearningEnable", "0") != "0" && day.toString() != lastday && hour == 4){
             stringstorage.saveString("lastday", day.toString())
-            deeplearncycle()
+            val deeplearnmanager = DeepLearnManager()
+            deeplearnmanager.deeplearncycle(this)
         }
 
         // 알림 권한 요청 (Android 13 이상)
@@ -283,40 +278,103 @@ class Logger : AppCompatActivity() {
         }
     }
 
+    //---------------------------------실질적인 데이터 처리 구간 ---------------------------------------------------------
+
+
     private fun updateNotificationList(packageName: String?, title: String?, text: String?, timestamp: Long) {
         try {
-            if((title == null && text == null) ||
-                (stringstorage.getString("svlog").contains("${text}") && stringstorage.getString("svlog").contains("${java.util.Date(timestamp)}")) ||
-                packageName == "com.android.systemui" ||
-                packageName == "com.samsung.android.incallui" ||
-                packageName == "com.example.aliolio" ||
-                (packageName == "com.samsung.android.messaging" && text == "메시지 보기")) {
+            //패키지명 exeption
+            val packageexeption = DataBase.packageexeption
+
+            if ((title == null && text == null) ||
+                (stringstorage.getString("svlog")
+                    .contains("${text}") && stringstorage.getString("svlog")
+                    .contains("${java.util.Date(timestamp)}")) ||
+                //일반 예외처리
+                packageexeption.any { title!!.contains(it) } ||
+                //특수 예외처리
+                (packageName == "com.samsung.android.messaging" && text == "메시지 보기")
+            ) {
                 return
             }
 
             applylog("패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n")
-//            stringstorage.saveString("svlog", "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + stringstorage.getString("svlog"))
+            //            stringstorage.saveString("svlog", "패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n\n" + stringstorage.getString("svlog"))
 
             val logg = findViewById<TextView>(R.id.tv1)
 
+
             val userPrefs = stringstorage.getString("preferences") ?: ""
 
+
+            val randomname = RandomNameGenerator
             val systemPrompt = """""".trimIndent()
-            val safeTitle = title ?: ""
-            val safeText = text ?: ""
+
+            //------------------------------------------------------
+
+            var safeTitle = title ?: ""
+            var safeText = text ?: ""
             val safePackageName = packageName ?: ""
             val safetime = java.util.Date(timestamp) ?: ""
+
+            //이름 가명 처리
+            val namechart = DataBase.namechart //전역 처리 가능
+            val famousnamechart = DataBase.FamousNames
+
+            if (namechart.any { safeTitle.contains(it) }) safeTitle =
+                NameMap(namestorage).getnamemap(safeTitle)
+
+            //메시지 개인정보 가림 처리
+            //1단계: 이름 가명 처리
+            var splittedmessage = safeText.split(" ").toMutableList() //단어 단위로 나눔
+
+            for (index in 0 until splittedmessage.size) {
+                if (namechart.any { splittedmessage[index].contains(it) } && !famousnamechart.any {
+                        splittedmessage[index].contains(
+                            it
+                        )
+                    }) splittedmessage[index] =
+                    NameMap(namestorage).getnamemap(splittedmessage.find {
+                        splittedmessage.contains(it)
+                    }!!)
+            }
+            //2딘계: 추가 개인정보 가림 처리
+
+            val namemaskedmessage = splittedmessage.toString()
+
+            MessageMap(messagestorage, rawdata).mesasagemask(
+                this,
+                NameMap(namestorage).getnamemapbynewname(safeTitle),
+                namemaskedmessage,
+                safetime.toString()
+            )
+            //이제 개인정보 처리는 DataManager 가 담당함
+
+
+            //변경된 내용으로 userPrompt 적용
             val userPrompt = """
         패키지: $safePackageName
-        제목: $safeTitle
-        내용: $safeText
+        제목: ${NameMap(namestorage).getnamemap(safeTitle)}
+        내용: ${
+                MessageMap(messagestorage, rawdata).getlatestmessage(
+                    this,
+                    NameMap(namestorage).getnamemap(safeTitle)
+                )
+            }
         시간: $safetime
     """.trimIndent()
 
+            //userPrompt null 예외처리
             if (userPrompt.isBlank()) {
                 Log.e("NULLERROR", "⚠️ systemPrompt 또는 userPrompt가 비어 있음")
                 return
             }
+
+
+
+            //--------GPT 요청 생성 구역----------------------------------------------------------------------------
+
+
 
             val fixedpackagename = packageName!!.split(".")[1]
 
@@ -336,6 +394,7 @@ class Logger : AppCompatActivity() {
                                         ) == PackageManager.PERMISSION_GRANTED
                                     ) {
                                         pushNotification.sendBasicNotification(
+                                            //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
                                             "중요한 메시지: $safeTitle",
                                             safeText
                                         )
@@ -348,34 +407,44 @@ class Logger : AppCompatActivity() {
                     }
                 }
             } else{
-                val client = messagestorage.getString(safeTitle + "@" + fixedpackagename, "")
-//문자열 리스트 escape 처리 적용
-                val newEntry = encode(listOf(safeText, java.util.Date(timestamp).toString()))
+                //val ed = EncodeDecode()
+//                val client = messagestorage.getString(NameMap(namestorage).getnamemap(safeTitle), "")
+////문자열 리스트 escape 처리 적용
+//                val newEntry = ed.encode(listOf(safeText, java.util.Date(timestamp).toString()))
+//
+//                if (client != "") {
+//                    messagestorage.saveString(
+//                        safeTitle + "@" + fixedpackagename,
+//                        client + " " + newEntry
+//                    )
+//                } else {
+//                    messagestorage.saveString(
+//                        safeTitle + "@" + fixedpackagename,
+//                        newEntry
+//                    )
+//                }
+//
+////문자열 리스트 escape 처리 적용
+//                val clients = messagestorage.getString("clients", "")
+//                val clientList = if (clients.isNotEmpty()) ed.decode(clients).toMutableList() else mutableListOf()
+//                //이름@플랫폼@가명
+//                if (!clientList.contains(safeTitle + "@" + fixedpackagename + "@")) {
+//                    if (client != "") {
+//                        val coveredname = randomname.generateName()
+//                        clientList.add(safeTitle + "@" + fixedpackagename)
+//                        messagestorage.saveString(safeTitle + "@" + fixedpackagename, coveredname)
+//                        messagestorage.saveString("clients", ed.encode(clientList)) // 🔧 escape 적용 저장
+//                    }
+//                }
 
-                if (client != "") {
-                    messagestorage.saveString(
-                        safeTitle + "@" + fixedpackagename,
-                        client + " " + newEntry
-                    )
-                } else {
-                    messagestorage.saveString(
-                        safeTitle + "@" + fixedpackagename,
-                        newEntry
-                    )
-                }
+                //딥러닝 메시지 내용 추가
 
-//문자열 리스트 escape 처리 적용
-                val clients = messagestorage.getString("clients", "")
-                val clientList = if (clients.isNotEmpty()) decode(clients).toMutableList() else mutableListOf()
 
-                if (!clientList.contains(safeTitle + "@" + fixedpackagename)) {
-                    if (client != "") {
-                        clientList.add(safeTitle + "@" + fixedpackagename)
-                        messagestorage.saveString("clients", encode(clientList)) // 🔧 escape 적용 저장
-                    }
-                }
+
+                //딤러닝 메시지 전송 부분
+
                 OpenAiClient.sendMessageswithDeepLearn(
-                    systemPrompt1 = stringstorage.getString(title + "@" + fixedpackagename, "@@@@@@@") ,systemPrompt2 = userPrefs, userPrompt = userPrompt
+                    systemPrompt1 = deeplearnstorage.getString(safeTitle, "@@@@@@@") ,systemPrompt2 = userPrefs, userPrompt = userPrompt
                 ) { reply ->
                     if (reply != null) {
                         runOnUiThread {
@@ -424,37 +493,4 @@ class Logger : AppCompatActivity() {
         stringstorage.saveString("svlog", "$logvalue\n\n" + stringstorage.getString("svlog"))
         logg?.text = stringstorage.getString("svlog")
     }
-
-    private fun deeplearncycle(){
-        val clients = messagestorage.getString("clients", "")
-        val clientList = if (clients.isNotEmpty()) decode(clients).map { it.trim() }.filter { it.isNotEmpty() } else emptyList()
-// 🔧 decode 적용
-        if (clients != "") {
-            for (i in clientList) {
-                val index = i
-                // value separator는 @로 함
-                // steve@kakaotalk: <관계>@<Formal>@<Friendly>@<Close>@<Transactional>@<Hierarchical>@<Conflicted>@<요약본>
-                val usrPrompt = messagestorage.getString(index)
-
-                OpenAiClient.sendDeepLearnMessages(
-                    systemPrompt = deeplearnstorage.getString(index),
-                    userPrompt = usrPrompt
-                ) { reply ->
-                    if (reply != null) {
-                        runOnUiThread {
-                            Log.d("DeepLearnCycle", reply)
-                            deeplearnstorage.saveString(index, reply)
-                            Log.d("DeepLearnCycle", "Updated Weight")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun escape(s: String): String = s.replace(",", "<<COMMA>>")
-    fun unescape(s: String): String = s.replace("<<COMMA>>", ",")
-
-    fun encode(list: List<String>): String = list.joinToString(",") { escape(it) }
-    fun decode(encoded: String): List<String> = encoded.split(",").map { unescape(it) }
 }

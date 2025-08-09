@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.aliolio"
+    namespace = "com.uselessdev.tetramenai"
     compileSdk = 34
 
     defaultConfig {
