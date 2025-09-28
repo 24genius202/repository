@@ -77,6 +77,8 @@
             android:exported="false"/>
         <activity android:name=".PersonalInformationUsage"
             android:exported="false"/>
+        <activity android:name=".namemapviewer"
+            android:exported="false"/>
     </application>
 
 </manifest>

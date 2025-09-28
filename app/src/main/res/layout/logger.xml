@@ -11,7 +11,7 @@
 
     <LinearLayout
         android:layout_width="380dp"
-        android:layout_height="670dp"
+        android:layout_height="620dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:background="@drawable/rounded_corner"
@@ -53,10 +53,9 @@
             style="@style/RoundedButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            android:layout_gravity="top"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:hapticFeedbackEnabled="true"
             android:layout_marginStart="10dp"
             android:text="초기화"
@@ -71,10 +70,25 @@
             android:layout_gravity="end"
             app:layout_constraintStart_toEndOf="@id/reset"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+
             android:hapticFeedbackEnabled="true"
             android:layout_marginStart="10dp"
             android:text="딥러닝 현황"
+            android:textSize="15sp"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/gotonamemapview"
+            style="@style/RoundedButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            app:layout_constraintStart_toEndOf="@id/gotodeeplearnstats"
+            app:layout_constraintTop_toTopOf="parent"
+
+            android:hapticFeedbackEnabled="true"
+            android:layout_marginStart="10dp"
+            android:text="가명화 현황"
             android:textSize="15sp"
             app:cornerRadius="16dp" />
 
@@ -85,11 +99,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/reset"
+
             android:layout_marginEnd="10dp"
             android:hapticFeedbackEnabled="true"
+            android:layout_marginStart="10dp"
             android:text="뒤로"
             android:textSize="15sp"
             app:cornerRadius="16dp" />

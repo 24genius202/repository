@@ -20,36 +20,32 @@ class NameMap(private val namestorage: StringStorage) {
         namestorage.saveString("namemap", EncodeDecode().encode(originallist))
     }
 
-    fun getnamemap(name: String): String{
-
+    fun getnamemapbynewname(newname: String): String {
         val namelist = EncodeDecode().decode(namestorage.getString("namemap", ""))
 
-        if(!namelist.isEmpty()){
-            val foundname = namelist.find { it.split(":")[0] == name }
-            if(foundname != null){
-                return foundname.split(":")[1]
+        if (namelist.isNotEmpty()) {
+            val foundname = namelist.find {
+                val parts = it.split(":")
+                parts.size == 2 && parts[1] == newname
             }
-            else{
-                //없으면 생성하고 함수 재귀
-                createnewnamemap(name)
-                return getnamemap(name)
-            }
+            return foundname?.split(":")?.get(0) ?: ""
         }
 
         return ""
     }
 
-    fun getnamemapbynewname(newname: String): String{
+    fun getnamemap(name: String): String {
         val namelist = EncodeDecode().decode(namestorage.getString("namemap", ""))
 
-        if(!namelist.isEmpty()){
-            val foundname = namelist.find { it.split(":")[1] == newname }
-            if(foundname != null){
-                return foundname.split(":")[0]
+        if (namelist.isNotEmpty()) {
+            val foundname = namelist.find {
+                val parts = it.split(":")
+                parts.size == 2 && parts[0] == name
             }
-            else{
-                return ""
-            }
+            if (foundname != null) return foundname.split(":")[1]
+            // 없으면 새로 생성
+            createnewnamemap(name)
+            return getnamemap(name)
         }
 
         return ""

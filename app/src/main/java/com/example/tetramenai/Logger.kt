@@ -65,6 +65,7 @@ class Logger : AppCompatActivity() {
 
         stringstorage = StringStorage(this)
         messagestorage = StringStorage(this)
+        rawdata = StringStorage(this)
         deeplearnstorage = StringStorage(this)
         namestorage = StringStorage(this)
 
@@ -90,6 +91,7 @@ class Logger : AppCompatActivity() {
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         var lastday = stringstorage.getString("lastday", "0")
 
+        //전송 시간 설정
         if(stringstorage.getString("DeepLearningEnable", "0") != "0" && day.toString() != lastday && hour == 4){
             stringstorage.saveString("lastday", day.toString())
             val deeplearnmanager = DeepLearnManager()
@@ -157,6 +159,14 @@ class Logger : AppCompatActivity() {
         gotodeeplearnstats.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             val intent = Intent(this, DeepLearnStats::class.java)
+            startActivity(intent)
+        }
+
+        val gotonamemapviewer = findViewById<Button>(R.id.gotonamemapview)
+
+        gotonamemapviewer.setOnClickListener{
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            val intent = Intent(this, namemapviewer::class.java)
             startActivity(intent)
         }
     }
@@ -291,7 +301,7 @@ class Logger : AppCompatActivity() {
                     .contains("${text}") && stringstorage.getString("svlog")
                     .contains("${java.util.Date(timestamp)}")) ||
                 //일반 예외처리
-                packageexeption.any { title!!.contains(it) } ||
+                (packageName != null && packageexeption.any { packageName.contains(it) }) ||
                 //특수 예외처리
                 (packageName == "com.samsung.android.messaging" && text == "메시지 보기")
             ) {
@@ -328,23 +338,23 @@ class Logger : AppCompatActivity() {
             //1단계: 이름 가명 처리
             var splittedmessage = safeText.split(" ").toMutableList() //단어 단위로 나눔
 
-            for (index in 0 until splittedmessage.size) {
-                if (namechart.any { splittedmessage[index].contains(it) } && !famousnamechart.any {
-                        splittedmessage[index].contains(
-                            it
-                        )
-                    }) splittedmessage[index] =
-                    NameMap(namestorage).getnamemap(splittedmessage.find {
-                        splittedmessage.contains(it)
-                    }!!)
+            for (index in splittedmessage.indices) {
+                val word = splittedmessage[index]
+                if (namechart.any { word.contains(it) } &&
+                    !famousnamechart.any { word.contains(it) }
+                ) {
+                    splittedmessage[index] = NameMap(namestorage).getnamemap(word)
+                }
             }
             //2딘계: 추가 개인정보 가림 처리
 
             val namemaskedmessage = splittedmessage.toString()
 
+            val originalname = NameMap(namestorage).getnamemapbynewname(safeTitle)
+            // 안전하게 null fallback
             MessageMap(messagestorage, rawdata).mesasagemask(
                 this,
-                NameMap(namestorage).getnamemapbynewname(safeTitle),
+                originalname,   // null이면 원래 제목 사용
                 namemaskedmessage,
                 safetime.toString()
             )
@@ -354,11 +364,11 @@ class Logger : AppCompatActivity() {
             //변경된 내용으로 userPrompt 적용
             val userPrompt = """
         패키지: $safePackageName
-        제목: ${NameMap(namestorage).getnamemap(safeTitle)}
+        제목: $safeTitle
         내용: ${
                 MessageMap(messagestorage, rawdata).getlatestmessage(
                     this,
-                    NameMap(namestorage).getnamemap(safeTitle)
+                    NameMap(namestorage).getnamemapbynewname(safeTitle)
                 )
             }
         시간: $safetime
@@ -386,6 +396,7 @@ class Logger : AppCompatActivity() {
                         runOnUiThread {
                             Log.d("GPT 응답", reply)
                             if (reply != "0") {
+                                //응답 처리 구간
                                 applylog(reply)
                                 if (!reply.contains("This endpoint is deprecated")) {
                                     if (ActivityCompat.checkSelfPermission(
