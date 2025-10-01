@@ -28,7 +28,7 @@ object OpenAiClient {
 
         val json = JSONObject().put("messages", messages)
 
-        Log.d(TAG, "📤 Sending JSON to server: ${json.toString(2)}")
+        Log.d(TAG, "Sending JSON to server: ${json.toString(2)}")
 
         val body = RequestBody.create(
             "application/json; charset=utf-8".toMediaTypeOrNull(),
@@ -42,7 +42,7 @@ object OpenAiClient {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "❌ 요청 실패", e)
+                Log.e(TAG, "요청 실패", e)
                 callback(null)
             }
 
@@ -52,7 +52,7 @@ object OpenAiClient {
                     val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
                     callback(reply)
                 } else {
-                    Log.e(TAG, "❌ 응답 실패: ${response.code}")
+                    Log.e(TAG, "응답 실패: ${response.code}")
                     callback(null)
                 }
             }
@@ -71,7 +71,7 @@ object OpenAiClient {
 
         val json = JSONObject().put("messages", messages)
 
-        Log.d(TAG, "📤 Sending JSON to server: ${json.toString(2)}")
+        Log.d(TAG, "Sending JSON to server: ${json.toString(2)}")
 
         val body = RequestBody.create(
             "application/json; charset=utf-8".toMediaTypeOrNull(),
@@ -85,7 +85,7 @@ object OpenAiClient {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "❌ 요청 실패", e)
+                Log.e(TAG, "요청 실패", e)
                 callback(null)
             }
 
@@ -95,7 +95,7 @@ object OpenAiClient {
                     val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
                     callback(reply)
                 } else {
-                    Log.e(TAG, "❌ 응답 실패: ${response.code}")
+                    Log.e(TAG, "응답 실패: ${response.code}")
                     callback(null)
                 }
             }
@@ -116,7 +116,7 @@ object OpenAiClient {
 
         val json = JSONObject().put("messages", messages)
 
-        Log.d(TAG, "📤 Sending JSON to server: ${json.toString(2)}")
+        Log.d(TAG, "Sending JSON to server: ${json.toString(2)}")
 
         val body = RequestBody.create(
             "application/json; charset=utf-8".toMediaTypeOrNull(),
@@ -130,7 +130,7 @@ object OpenAiClient {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "❌ 요청 실패", e)
+                Log.e(TAG, "요청 실패", e)
                 callback(null)
             }
 
@@ -140,7 +140,7 @@ object OpenAiClient {
                     val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
                     callback(reply)
                 } else {
-                    Log.e(TAG, "❌ 응답 실패: ${response.code}")
+                    Log.e(TAG, "응답 실패: ${response.code}")
                     callback(null)
                 }
             }

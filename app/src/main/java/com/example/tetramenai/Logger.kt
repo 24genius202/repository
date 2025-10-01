@@ -314,7 +314,44 @@ class Logger : AppCompatActivity() {
             val logg = findViewById<TextView>(R.id.tv1)
 
 
-            val userPrefs = stringstorage.getString("preferences") ?: ""
+            val rawuserPrefs = stringstorage.getString("preferences") ?: ""
+            //이름 가명 처리
+            val namechart = DataBase.namechart //전역 처리 가능
+            val famousnamechart = DataBase.FamousNames
+
+            //메시지 개인정보 가림 처리
+            //1단계: 이름 가명 처리
+            var splittedprompt = rawuserPrefs.split(" ", "\n").toMutableList() //단어 단위로 나눔
+
+            for (index in splittedprompt.indices) {
+                val word = splittedprompt[index]
+                if (namechart.any { word.contains(it) } &&
+                    !famousnamechart.any { word.contains(it) }
+                ) {
+                    val found = namechart
+                        .mapNotNull { candidate ->
+                            val idx = word.indexOf(candidate)
+                            if (idx >= 0) candidate to idx else null
+                        }
+                        .minByOrNull { it.second }  // 문자열에서 가장 앞에 있는 것 선택
+
+                    if(found != null) {
+                        val (match, position) = found
+                        val name = splittedprompt[index].substring(position, position) //이름 부분만 선택
+                        var front = ""
+                        var back = ""
+                        if(position != 0) front = splittedprompt[index].substring(0, position-1)
+                        if(position+1 < splittedprompt[index].length) back = splittedprompt[index].substring(position, splittedprompt[index].length-1)
+                        if(front != "") splittedprompt[index] = front
+                        splittedprompt.add(index+1,name)
+                        if(back != "") splittedprompt.add(index+2, back)
+                    }
+                }
+            }
+            //2딘계: 추가 개인정보 가림 처리
+            val processeduserPrefs = PrivacyMasker().mask(splittedprompt.toString())
+
+            applylog("유저 설정 변경됨: $processeduserPrefs")
 
 
             val randomname = RandomNameGenerator
@@ -328,22 +365,44 @@ class Logger : AppCompatActivity() {
             val safetime = java.util.Date(timestamp) ?: ""
 
             //이름 가명 처리
-            val namechart = DataBase.namechart //전역 처리 가능
-            val famousnamechart = DataBase.FamousNames
+//            val namechart = DataBase.namechart //전역 처리 가능
+//            val famousnamechart = DataBase.FamousNames
 
             if (namechart.any { safeTitle.contains(it) }) safeTitle =
                 NameMap(namestorage).getnamemap(safeTitle)
 
             //메시지 개인정보 가림 처리
             //1단계: 이름 가명 처리
-            var splittedmessage = safeText.split(" ").toMutableList() //단어 단위로 나눔
+            var splittedmessage = safeText.split(" ", "\n").toMutableList() //단어 단위로 나눔
 
             for (index in splittedmessage.indices) {
                 val word = splittedmessage[index]
                 if (namechart.any { word.contains(it) } &&
                     !famousnamechart.any { word.contains(it) }
                 ) {
-                    splittedmessage[index] = NameMap(namestorage).getnamemap(word)
+                    val found = namechart
+                        .mapNotNull { candidate ->
+                            val idx = word.indexOf(candidate)
+                            if (idx >= 0) candidate to idx else null
+                        }
+                        .minByOrNull { it.second }  // 문자열에서 가장 앞에 있는 것 선택
+
+                    if(found != null) {
+                        val (match, position) = found
+                        val name =
+                            splittedprompt[index].substring(position, position) //이름 부분만 선택
+                        var front = ""
+                        var back = ""
+                        if (position != 0) front = splittedprompt[index].substring(0, position - 1)
+                        if (position + 1 < splittedprompt[index].length) back =
+                            splittedprompt[index].substring(
+                                position,
+                                splittedprompt[index].length - 1
+                            )
+                        if(front != "") splittedprompt[index] = front
+                        splittedprompt.add(index + 1, name)
+                        if(back != "") splittedprompt.add(index + 2, back)
+                    }
                 }
             }
             //2딘계: 추가 개인정보 가림 처리
@@ -390,7 +449,7 @@ class Logger : AppCompatActivity() {
 
             if(stringstorage.getString("DeepLearningEnable", "0") == "0") {
                 OpenAiClient.sendMessages(
-                    systemPrompt = userPrefs, userPrompt = userPrompt
+                    systemPrompt = processeduserPrefs, userPrompt = userPrompt
                 ) { reply ->
                     if (reply != null) {
                         runOnUiThread {
@@ -404,10 +463,19 @@ class Logger : AppCompatActivity() {
                                             Manifest.permission.POST_NOTIFICATIONS
                                         ) == PackageManager.PERMISSION_GRANTED
                                     ) {
+                                        val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safeTitle)
+                                        var splittedresultText = safeText.split(" ", "\n").toMutableList()
+                                        for(i in 0 until splittedresultText.size){
+                                            val namemap = NameMap(namestorage)
+                                            val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
+                                            if(isvalidname == "") continue
+                                            splittedresultText[i] = isvalidname
+                                        }
+                                        val renormalisedText = splittedresultText.joinToString(" ")
                                         pushNotification.sendBasicNotification(
                                             //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
-                                            "중요한 메시지: $safeTitle",
-                                            safeText
+                                            "중요한 메시지: $renormalisedTitle",
+                                            renormalisedText
                                         )
                                     }
                                 }
@@ -455,7 +523,7 @@ class Logger : AppCompatActivity() {
                 //딤러닝 메시지 전송 부분
 
                 OpenAiClient.sendMessageswithDeepLearn(
-                    systemPrompt1 = deeplearnstorage.getString(safeTitle, "@@@@@@@") ,systemPrompt2 = userPrefs, userPrompt = userPrompt
+                    systemPrompt1 = deeplearnstorage.getString(safeTitle, "@@@@@@@") ,systemPrompt2 = processeduserPrefs, userPrompt = userPrompt
                 ) { reply ->
                     if (reply != null) {
                         runOnUiThread {
@@ -468,9 +536,19 @@ class Logger : AppCompatActivity() {
                                             Manifest.permission.POST_NOTIFICATIONS
                                         ) == PackageManager.PERMISSION_GRANTED
                                     ) {
+                                        val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safeTitle)
+                                        var splittedresultText = safeText.split(" ", "\n").toMutableList()
+                                        for(i in 0 until splittedresultText.size){
+                                            val namemap = NameMap(namestorage)
+                                            val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
+                                            if(isvalidname == "") continue
+                                            splittedresultText[i] = isvalidname
+                                        }
+                                        val renormalisedText = splittedresultText.toString()
                                         pushNotification.sendBasicNotification(
-                                            "중요한 메시지: $safeTitle",
-                                            safeText
+                                            //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
+                                            "중요한 메시지: $renormalisedTitle",
+                                            renormalisedText
                                         )
                                     }
                                 }

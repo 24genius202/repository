@@ -62,5 +62,5 @@ object DataBase{
         "영민", "세현", "동건", "태영", "영훈", "규빈", "승재", "준영", "시영", "건민",
         "준범", "시온", "현빈", "태민", "유현", "우빈", "준호", "선우", "우석", "재현")
 
-    val packageexeption = listOf<String>("com.android.systemui", "com.samsung.android.incallui", "com.example.aliolio", "com.uselessdev.tetramenai")
+    val packageexeption = listOf<String>("com.android.systemui", "com.samsung.android.incallui", "com.example.aliolio", "com.uselessdev.tetramenai", "android")
 }
