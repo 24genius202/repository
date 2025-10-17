@@ -52,7 +52,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginBottom="15dp"
-                        android:text="1. 설정창에서 본인에 관한 정보/받고 싶은 메시지/받고 싶지 않은 메시지 등을 작성하고 저장 버튼을 누른다\n\n2. 로그 페이지에 들어간다(로그 페이지를 열어 놓아야지 정상작동한다)\n\n3. 본인 할 일을 한다"/>
+                        android:text="1. 설정창에서 본인에 관한 정보/받고 싶은 메시지/받고 싶지 않은 메시지 등을 상세하게 작성한다.\n\n 2. 설정 -> 배터리 -> 백그라운드 앱 사용 제한 -> 자동 절전 예외 앱 -> TetramenAI 앱 선택\n2번 설정 안할 시 백그라운드 서비스 사용 불가"/>
 
                 </LinearLayout>
 
@@ -73,13 +73,6 @@
                         android:layout_margin="10dp"
                         android:text="사용시 주의사항:"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginStart="30dp"
-                        android:textSize="16sp"
-                        android:text="제1장: 개인정보 보호"/>
 
                     <TextView
                         android:layout_width="match_parent"

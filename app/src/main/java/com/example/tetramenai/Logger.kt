@@ -86,18 +86,6 @@ class Logger : AppCompatActivity() {
             }
         }
 
-        val calendar = Calendar.getInstance()
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        var lastday = stringstorage.getString("lastday", "0")
-
-        //전송 시간 설정
-        if(stringstorage.getString("DeepLearningEnable", "0") != "0" && day.toString() != lastday && hour == 4){
-            stringstorage.saveString("lastday", day.toString())
-            val deeplearnmanager = DeepLearnManager()
-            deeplearnmanager.deeplearncycle(this)
-        }
-
         // 알림 권한 요청 (Android 13 이상)
         //requestNotificationPermission()
 

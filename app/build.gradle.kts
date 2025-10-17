@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.uselessdev.tetramenai"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 34
-        versionCode = 1
-        versionName = "2.0.0"
+        versionCode = 1600
+        versionName = "V6.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,4 +67,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation("com.google.code.gson:gson:2.13.1")
+
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 }

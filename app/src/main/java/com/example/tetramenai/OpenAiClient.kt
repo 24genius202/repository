@@ -1,12 +1,14 @@
 package com.uselessdev.tetramenai
 
 import android.util.Log
-import android.widget.TextView
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 object OpenAiClient {
     private const val TAG = "OpenAiClient"
@@ -16,8 +18,8 @@ object OpenAiClient {
 
     private val client = OkHttpClient()
 
+    // Callback-based function for compatibility
     fun sendMessages(systemPrompt: String, userPrompt: String, callback: (String?) -> Unit) {
-        // 메시지 구성
         val safeSystemPrompt = systemPrompt ?: ""
         val safeUserPrompt = userPrompt ?: ""
 
@@ -49,7 +51,11 @@ object OpenAiClient {
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     val responseBody = response.body?.string()
-                    val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
+                    val reply = try {
+                        JSONObject(responseBody ?: "{}").optString("reply", null)
+                    } catch (e: Exception) {
+                        null
+                    }
                     callback(reply)
                 } else {
                     Log.e(TAG, "응답 실패: ${response.code}")
@@ -59,8 +65,16 @@ object OpenAiClient {
         })
     }
 
+    // Suspend wrapper for coroutine usage
+    suspend fun sendMessagesSuspend(systemPrompt: String, userPrompt: String): String? =
+        suspendCancellableCoroutine { cont ->
+            sendMessages(systemPrompt, userPrompt) { reply ->
+                if (cont.isActive) cont.resume(reply)
+            }
+        }
+
+    // Callback-based function for DeepLearn
     fun sendDeepLearnMessages(systemPrompt: String, userPrompt: String, callback: (String?) -> Unit) {
-        // 메시지 구성
         val safeSystemPrompt = systemPrompt ?: ""
         val safeUserPrompt = userPrompt ?: ""
 
@@ -92,7 +106,11 @@ object OpenAiClient {
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     val responseBody = response.body?.string()
-                    val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
+                    val reply = try {
+                        JSONObject(responseBody ?: "{}").optString("reply", null)
+                    } catch (e: Exception) {
+                        null
+                    }
                     callback(reply)
                 } else {
                     Log.e(TAG, "응답 실패: ${response.code}")
@@ -102,8 +120,15 @@ object OpenAiClient {
         })
     }
 
-    fun sendMessageswithDeepLearn(systemPrompt1: String, systemPrompt2: String, userPrompt: String, callback: (String?) -> Unit){
-        // 메시지 구성
+    suspend fun sendDeepLearnMessagesSuspend(systemPrompt: String, userPrompt: String): String? =
+        suspendCancellableCoroutine { cont ->
+            sendDeepLearnMessages(systemPrompt, userPrompt) { reply ->
+                if (cont.isActive) cont.resume(reply)
+            }
+        }
+
+    // Callback-based function for Messages with DeepLearn
+    fun sendMessageswithDeepLearn(systemPrompt1: String, systemPrompt2: String, userPrompt: String, callback: (String?) -> Unit) {
         val safeSystemPrompt1 = systemPrompt1 ?: ""
         val safeSystemPrompt2 = systemPrompt2 ?: ""
         val safeUserPrompt = userPrompt ?: ""
@@ -137,7 +162,11 @@ object OpenAiClient {
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     val responseBody = response.body?.string()
-                    val reply = JSONObject(responseBody ?: "{}").optString("reply", null)
+                    val reply = try {
+                        JSONObject(responseBody ?: "{}").optString("reply", null)
+                    } catch (e: Exception) {
+                        null
+                    }
                     callback(reply)
                 } else {
                     Log.e(TAG, "응답 실패: ${response.code}")
@@ -146,4 +175,11 @@ object OpenAiClient {
             }
         })
     }
+
+    suspend fun sendMessageswithDeepLearnSuspend(systemPrompt1: String, systemPrompt2: String, userPrompt: String): String? =
+        suspendCancellableCoroutine { cont ->
+            sendMessageswithDeepLearn(systemPrompt1, systemPrompt2, userPrompt) { reply ->
+                if (cont.isActive) cont.resume(reply)
+            }
+        }
 }

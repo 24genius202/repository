@@ -12,6 +12,9 @@ class DeepLearnStats : AppCompatActivity() {
 
     data class Person(val name: String, val relation: String, val formal: String, val friendly: String, val close: String, val transactional: String, val hierarchical: String, val conflicted: String)
     private lateinit var stringstorage: StringStorage
+    private lateinit var namestorage: StringStorage
+
+    fun setnamestorage(ns: StringStorage){ namestorage = ns }
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +22,7 @@ class DeepLearnStats : AppCompatActivity() {
         setContentView(R.layout.deeplearnstats)
 
         val tableLayout = findViewById<TableLayout>(R.id.tablelayout)
-        stringstorage = StringStorage(this)
+
 
         // 헤더 행 추가
         val headerRow = TableRow(this)
