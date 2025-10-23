@@ -254,10 +254,10 @@ class MainService : Service() {
             if(stringstorage.getString("DeepLearningEnable", "0") == "0") {
                 // Use suspend version in coroutine
                 CoroutineScope(Dispatchers.IO).launch {
-                    val reply = OpenAiClient.sendMessagesSuspend(
+                    val reply = async { OpenAiClient.sendMessagesSuspend(
                         systemPrompt = processeduserPrefs,
                         userPrompt = userPrompt
-                    )
+                    ) }.await()
 
                     if (reply != null) {
                         Log.d("GPT 응답", reply)
@@ -329,11 +329,12 @@ class MainService : Service() {
                 //딤러닝 메시지 전송 부분
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    val replyDL = OpenAiClient.sendMessageswithDeepLearnSuspend(
+                    val replyDL = async { OpenAiClient.sendMessageswithDeepLearnSuspend(
                         systemPrompt1 = deeplearnstorage.getString(safeTitle, "@@@@@@@"),
                         systemPrompt2 = processeduserPrefs,
                         userPrompt = userPrompt
-                    )
+                    ) }.await()
+
                     if (replyDL != null) {
                         Log.d("GPT(DL) 응답", replyDL)
                         if (replyDL != "0") {

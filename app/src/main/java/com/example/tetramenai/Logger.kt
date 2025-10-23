@@ -23,6 +23,11 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import java.util.Calendar
 import com.uselessdev.tetramenai.DataBase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.util.jar.Attributes
 
 class Logger : AppCompatActivity() {
@@ -436,43 +441,55 @@ class Logger : AppCompatActivity() {
             val fixedpackagename = packageName!!.split(".")[1]
 
             if(stringstorage.getString("DeepLearningEnable", "0") == "0") {
-                OpenAiClient.sendMessages(
-                    systemPrompt = processeduserPrefs, userPrompt = userPrompt
-                ) { reply ->
-                    if (reply != null) {
-                        runOnUiThread {
-                            Log.d("GPT 응답", reply)
-                            if (reply != "0") {
-                                //응답 처리 구간
-                                applylog(reply)
-                                if (!reply.contains("This endpoint is deprecated")) {
-                                    if (ActivityCompat.checkSelfPermission(
-                                            this,
-                                            Manifest.permission.POST_NOTIFICATIONS
-                                        ) == PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safeTitle)
-                                        var splittedresultText = safeText.split(" ", "\n").toMutableList()
-                                        for(i in 0 until splittedresultText.size){
-                                            val namemap = NameMap(namestorage)
-                                            val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
-                                            if(isvalidname == "") continue
-                                            splittedresultText[i] = isvalidname
+                CoroutineScope(Dispatchers.IO).launch {
+                    val result = async {
+                        OpenAiClient.sendMessages(
+                            systemPrompt = processeduserPrefs, userPrompt = userPrompt
+                        ) { reply ->
+                            if (reply != null) {
+                                runOnUiThread {
+                                    Log.d("GPT 응답", reply)
+                                    if (reply != "0") {
+                                        //응답 처리 구간
+                                        applylog(reply)
+                                        if (!reply.contains("This endpoint is deprecated")) {
+                                            if (ActivityCompat.checkSelfPermission(
+                                                    applicationContext,
+                                                    Manifest.permission.POST_NOTIFICATIONS
+                                                ) == PackageManager.PERMISSION_GRANTED
+                                            ) {
+                                                val renormalisedTitle =
+                                                    NameMap(namestorage).getnamemapbynewname(
+                                                        safeTitle
+                                                    )
+                                                var splittedresultText =
+                                                    safeText.split(" ", "\n").toMutableList()
+                                                for (i in 0 until splittedresultText.size) {
+                                                    val namemap = NameMap(namestorage)
+                                                    val isvalidname = namemap.getnamemapbynewname(
+                                                        splittedresultText[i]
+                                                    )
+                                                    if (isvalidname == "") continue
+                                                    splittedresultText[i] = isvalidname
+                                                }
+                                                val renormalisedText =
+                                                    splittedresultText.joinToString(" ")
+                                                pushNotification.sendBasicNotification(
+                                                    //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
+                                                    "중요한 메시지: $renormalisedTitle",
+                                                    renormalisedText
+                                                )
+                                            }
                                         }
-                                        val renormalisedText = splittedresultText.joinToString(" ")
-                                        pushNotification.sendBasicNotification(
-                                            //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
-                                            "중요한 메시지: $renormalisedTitle",
-                                            renormalisedText
-                                        )
                                     }
                                 }
+                            } else {
+                                Log.e("GPT 응답", "Null 응답")
                             }
                         }
-                    } else {
-                        Log.e("GPT 응답", "Null 응답")
-                    }
+                    }.await()
                 }
+
             } else{
                 //val ed = EncodeDecode()
 //                val client = messagestorage.getString(NameMap(namestorage).getnamemap(safeTitle), "")

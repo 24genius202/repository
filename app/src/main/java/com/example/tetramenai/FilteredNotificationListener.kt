@@ -11,8 +11,6 @@ class FilteredNotificationListener : NotificationListenerService() {
     // 읽고 싶은 앱들의 패키지명
     private val targetPackages = listOf(
         "com.kakao.talk",      // 카카오톡
-        "com.facebook.orca",   // 메신저
-        "com.whatsapp",        // 왓츠앱
         "com.samsung.android.messaging" // 삼성 메시지
     )
 
