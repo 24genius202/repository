@@ -11,8 +11,9 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class MessageQueue {
+class MessageQueue(private val onReply: (String) -> Unit) {
 
     private var isrunning: Boolean = false
 
@@ -36,22 +37,25 @@ class MessageQueue {
                 val systemPrompt1 = msgdata.second.second.first
                 val systemPrompt2 = msgdata.second.second.second
 
-                var reply: String?
+                var reply: String? = null
 
-                when(msgtype){
-                    "Norm" -> {
-                        reply = OpenAiClient.sendMessagesSuspend(systemPrompt = systemPrompt1, userPrompt = userPrompt)
-                    }
-                    "MsgDL" -> {
-                        reply = OpenAiClient.sendMessageswithDeepLearnSuspend(systemPrompt1 = systemPrompt1, systemPrompt2 = systemPrompt2, userPrompt = userPrompt)
-                    }
-                    "DL" -> {
-                        reply = OpenAiClient.sendDeepLearnMessagesSuspend(systemPrompt = systemPrompt1, userPrompt = userPrompt)
+                reply = when(msgtype){
+                    "Norm" -> async { OpenAiClient.sendMessagesSuspend(systemPrompt = systemPrompt1, userPrompt = userPrompt) }.await()
+                    "MsgDL" ->  async { OpenAiClient.sendMessageswithDeepLearnSuspend(systemPrompt1 = systemPrompt1, systemPrompt2 = systemPrompt2, userPrompt = userPrompt) }.await()
+                    "DL" -> async { OpenAiClient.sendDeepLearnMessagesSuspend(systemPrompt = systemPrompt1, userPrompt = userPrompt) }.await()
+                    else -> null
+                }
+
+                Log.d("MessageQueue", "GPT 응답 수신됨: $reply")
+
+                messagequeue.removeFirst()
+
+                reply?.let {
+                    withContext(Dispatchers.Main) {
+                        onReply(it)
                     }
                 }
 
-
-                //다른 코드에서 이 구조와 비슷하게 register 받고 순차적으로 후처리 실행
             }
         }
         isrunning = false

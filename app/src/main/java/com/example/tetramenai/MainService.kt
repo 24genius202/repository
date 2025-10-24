@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.tetramenai.MessageQueue
 
 class MainService : Service() {
     // CoroutineScope for service-wide coroutines
@@ -27,6 +28,9 @@ class MainService : Service() {
     private lateinit var pushNotification: PushNotification
     private lateinit var namestorage: StringStorage
     private lateinit var rawdata: StringStorage
+    private lateinit var messagequeue: MessageQueue
+    private var safetitle: String = ""
+    private var safetext: String = ""
 
     // LocalBroadcastManager 기반 리시버
     private val localReceiver = object : BroadcastReceiver() {
@@ -74,6 +78,14 @@ class MainService : Service() {
         startForeground(1, createForegroundNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
 
         DailyWorker.schedule(this)
+
+        messagequeue = MessageQueue { reply ->
+            Log.d("Logger", "콜백 호출됨")
+            register(reply)
+        }
+
+
+
         Log.d("MainService", "")
     }
 
@@ -243,145 +255,64 @@ class MainService : Service() {
                 Log.e("NULLERROR", "⚠️ systemPrompt 또는 userPrompt가 비어 있음")
             }
 
-
+            safetitle = safeTitle
+            safetext = safeText
 
             //--------GPT 요청 생성 구역----------------------------------------------------------------------------
 
+            if(stringstorage.getString("DeepLearningEnable", "") == "0") messagequeue.register("Norm", userPrompt, systemPrompt, null)
+            else messagequeue.register("MsgDL", userPrompt, deeplearnstorage.getString(safeTitle, "@@@@@@@") , systemPrompt)
 
+        } catch (e: Exception) {
+            Log.e("Logger", "알림 업데이트 실패", e)
+        }
+    }
 
-            val fixedpackagename = packageName!!.split(".")[1]
+    private var isrunning: Boolean = false
 
-            if(stringstorage.getString("DeepLearningEnable", "0") == "0") {
-                // Use suspend version in coroutine
-                CoroutineScope(Dispatchers.IO).launch {
-                    val reply = async { OpenAiClient.sendMessagesSuspend(
-                        systemPrompt = processeduserPrefs,
-                        userPrompt = userPrompt
-                    ) }.await()
+    private val replyqueue = ArrayDeque<String>()
 
-                    if (reply != null) {
-                        Log.d("GPT 응답", reply)
-                        if (reply != "0") {
-                            //응답 처리 구간
-//                        applylog(reply)
-                            if (!reply.contains("service endpoint is deprecated")) {
-                                if (ActivityCompat.checkSelfPermission(
-                                        service,
-                                        Manifest.permission.POST_NOTIFICATIONS
-                                    ) == PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safeTitle)
-                                    var splittedresultText = safeText.split(" ", "\n").toMutableList()
-                                    for(i in 0 until splittedresultText.size){
-                                        val namemap = NameMap(namestorage)
-                                        val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
-                                        if(isvalidname == "") continue
-                                        splittedresultText[i] = isvalidname
-                                    }
-                                    val renormalisedText = splittedresultText.joinToString(" ")
-                                    pushNotification.sendBasicNotification(
-                                        //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
-                                        "중요한 메시지: $renormalisedTitle",
-                                        renormalisedText
-                                    )
+    fun register(reply: String){
+        replyqueue.add(reply)
+        if(!isrunning){
+            isrunning = true
+            LoggerRunQueueUntilDepleted()
+        }
+    }
+
+    private fun LoggerRunQueueUntilDepleted() {
+        CoroutineScope(Dispatchers.IO).launch {
+            while (replyqueue.isNotEmpty()) {
+                val reply = replyqueue.removeFirst()
+
+                withContext(Dispatchers.Main) {
+                    Log.d("GPT 응답", reply)
+                    if (reply != "0") {
+                        if (!reply.contains("This endpoint is deprecated")) {
+                            if (ActivityCompat.checkSelfPermission(
+                                    applicationContext,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safetitle)
+                                var splittedresultText = safetext.split(" ", "\n").toMutableList()
+                                for (i in splittedresultText.indices) {
+                                    val namemap = NameMap(namestorage)
+                                    val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
+                                    if (isvalidname == "") continue
+                                    splittedresultText[i] = isvalidname
                                 }
+                                val renormalisedText = splittedresultText.joinToString(" ")
+                                pushNotification.sendBasicNotification(
+                                    "중요한 메시지: $renormalisedTitle",
+                                    renormalisedText
+                                )
                             }
                         }
-                    } else {
-                        Log.e("GPT 응답", "Null 응답")
-                    }
-                }
-            } else{
-                //val ed = EncodeDecode()
-//                val client = messagestorage.getString(NameMap(namestorage).getnamemap(safeTitle), "")
-////문자열 리스트 escape 처리 적용
-//                val newEntry = ed.encode(listOf(safeText, java.util.Date(timestamp).toString()))
-//
-//                if (client != "") {
-//                    messagestorage.saveString(
-//                        safeTitle + "@" + fixedpackagename,
-//                        client + " " + newEntry
-//                    )
-//                } else {
-//                    messagestorage.saveString(
-//                        safeTitle + "@" + fixedpackagename,
-//                        newEntry
-//                    )
-//                }
-//
-////문자열 리스트 escape 처리 적용
-//                val clients = messagestorage.getString("clients", "")
-//                val clientList = if (clients.isNotEmpty()) ed.decode(clients).toMutableList() else mutableListOf()
-//                //이름@플랫폼@가명
-//                if (!clientList.contains(safeTitle + "@" + fixedpackagename + "@")) {
-//                    if (client != "") {
-//                        val coveredname = randomname.generateName()
-//                        clientList.add(safeTitle + "@" + fixedpackagename)
-//                        messagestorage.saveString(safeTitle + "@" + fixedpackagename, coveredname)
-//                        messagestorage.saveString("clients", ed.encode(clientList)) // 🔧 escape 적용 저장
-//                    }
-//                }
-
-                //딥러닝 메시지 내용 추가
-
-
-
-                //딤러닝 메시지 전송 부분
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    val replyDL = async { OpenAiClient.sendMessageswithDeepLearnSuspend(
-                        systemPrompt1 = deeplearnstorage.getString(safeTitle, "@@@@@@@"),
-                        systemPrompt2 = processeduserPrefs,
-                        userPrompt = userPrompt
-                    ) }.await()
-
-                    if (replyDL != null) {
-                        Log.d("GPT(DL) 응답", replyDL)
-                        if (replyDL != "0") {
-//                        applylog(replyDL)
-                            if (!replyDL.contains("service endpoint is deprecated")) {
-                                if (ActivityCompat.checkSelfPermission(
-                                        service,
-                                        Manifest.permission.POST_NOTIFICATIONS
-                                    ) == PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    val renormalisedTitle = NameMap(namestorage).getnamemapbynewname(safeTitle)
-                                    var splittedresultText = safeText.split(" ", "\n").toMutableList()
-                                    for(i in 0 until splittedresultText.size){
-                                        val namemap = NameMap(namestorage)
-                                        val isvalidname = namemap.getnamemapbynewname(splittedresultText[i])
-                                        if(isvalidname == "") continue
-                                        splittedresultText[i] = isvalidname
-                                    }
-                                    val renormalisedText = splittedresultText.toString()
-                                    pushNotification.sendBasicNotification(
-                                        //메시지 알리는 부분은 마스킹 안한 본래 매시지로 전달
-                                        "중요한 메시지: $renormalisedTitle",
-                                        renormalisedText
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        Log.e("GPT(DL) 응답", "Null 응답")
                     }
                 }
             }
-
-//            val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-//            scope.launch {
-//                try {
-//                    val result = preprocess("패키지: $packageName\n제목: $title\n내용: $text\n시간: ${java.util.Date(timestamp)}\n", stringstorage.getString("preferences"))
-//                    if(result != "0" && result != null) {
-//                        Log.d("Logger", "GPT 처리 성공!")
-//                    }
-//                    stringstorage.saveString("svlog", "$result \n\n" + stringstorage.getString("svlog"))
-//                } catch (e: Exception) {
-//                    Log.e("Logger", "GPT 코루틴 실패", e)
-//                }
-//            }
-        } catch (e: Exception) {
-            Log.e("Logger", "알림 업데이트 실패", e)
+            isrunning = false
         }
     }
 
